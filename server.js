@@ -135,6 +135,21 @@ const DIICOT_ROLES = [
     { id: "1528758226420633750", name: "CADET", level: 1 }
 ];
 
+// Excepție de acces: contul primește drepturile conducerii fără a primi
+// un rol Discord sau un grad diferit în profil.
+const LEADERSHIP_USER_IDS = new Set(["1315733546312142921"]);
+
+function hasLeadershipAccess(user) {
+    return Boolean(user && (
+        Number(user.rankLevel || 0) >= 11 ||
+        LEADERSHIP_USER_IDS.has(String(user.id || ""))
+    ));
+}
+
+function getAccessLevel(user) {
+    return hasLeadershipAccess(user) ? Math.max(Number(user.rankLevel || 0), 11) : Number(user?.rankLevel || 0);
+}
+
 
 // ======================================================
 // ORGANIZATORI RAZIE / ANTRENAMENT
@@ -2628,12 +2643,7 @@ function requireAdmin(
             });
     }
 
-    if (
-        Number(
-            req.session.user.rankLevel ||
-            0
-        ) < 11
-    ) {
+    if (!hasLeadershipAccess(req.session.user)) {
 
         return res
             .status(403)
@@ -2665,12 +2675,7 @@ function requireSanctionManager(
     }
 
     // COMISAR ȘEF+ poate vedea, aplica și retrage sancțiuni.
-    if (
-        Number(
-            req.session.user.rankLevel ||
-            0
-        ) < 11
-    ) {
+    if (!hasLeadershipAccess(req.session.user)) {
         return res
             .status(403)
             .json({
@@ -2698,15 +2703,8 @@ function hasTesterAccess(
             ? user.roles.map(String)
             : [];
 
-    return (
-        Number(
-            user.rankLevel ||
-            0
-        ) >= 11 ||
-        roles.includes(
-            TESTER_DIICOT_ROLE_ID
-        )
-    );
+    return hasLeadershipAccess(user) ||
+        (Boolean(TESTER_DIICOT_ROLE_ID) && roles.includes(TESTER_DIICOT_ROLE_ID));
 }
 
 
@@ -3208,11 +3206,7 @@ app.get(
                 ? req.session.user.roles.map(String)
                 : [];
 
-        const isAdmin =
-            Number(
-                req.session.user.rankLevel ||
-                0
-            ) >= 11;
+        const isAdmin = hasLeadershipAccess(req.session.user);
 
         const isTester =
             roles.includes(TESTER_DIICOT_ROLE_ID);
@@ -4467,11 +4461,7 @@ app.post(
 
         // RAZIE / ANTRENAMENT normale pot fi postate doar de SUB INSPECTOR+.
         // Gradele mici (Agent Stagiar / Operativ / Principal) folosesc variantele DOVADĂ.
-        const authorRankLevel =
-            Number(
-                req.session.user.rankLevel ||
-                0
-            );
+        const authorRankLevel = getAccessLevel(req.session.user);
 
         const isOrganizerReport =
             type === "RAZIE" ||
@@ -8970,12 +8960,7 @@ app.get(
                 userId;
 
 
-            const canManage =
-                Number(
-                    req.session.user.rankLevel ||
-                    0
-                ) >= 11 &&
-                !isOwnProfile;
+            const canManage = hasLeadershipAccess(req.session.user) && !isOwnProfile;
 
 
             res.json({
@@ -10128,11 +10113,7 @@ app.get(
                 success:
                     true,
 
-                canEdit:
-                    Number(
-                        req.session.user.rankLevel ||
-                        0
-                    ) >= 11,
+                canEdit: hasLeadershipAccess(req.session.user),
 
                 rows:
                     (
@@ -13818,8 +13799,7 @@ app.get(
 
             return res.json({
                 permissions: {
-                    leadership:
-                        Number(req.session.user?.rankLevel || 0) >= 11,
+                    leadership: hasLeadershipAccess(req.session.user),
                     tester:
                         hasTesterAccess(req.session.user)
                 },
