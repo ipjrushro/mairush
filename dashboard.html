@@ -9245,6 +9245,7 @@ body{background:
 @keyframes v4Fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 @media(max-width:1250px){.v4-hero-shell{grid-template-columns:1fr .55fr}.v4-stats-grid{grid-template-columns:repeat(2,1fr)!important}.v4-main-grid{grid-template-columns:1fr}.v4-events-list{grid-template-columns:1fr!important}.v4-bottom-grid{grid-template-columns:1fr}}
 @media(max-width:760px){.dashboard-content{padding:12px!important}.command-topbar{margin:0 12px 12px!important}.v4-hero-shell{grid-template-columns:1fr;padding:24px 20px}.v4-hero-right{align-items:flex-start;min-height:auto;margin-top:24px}.v4-hero-logo{right:0}.v4-stats-grid{grid-template-columns:1fr!important}.v4-bottom-grid{grid-template-columns:1fr}.v4-quick-grid{grid-template-columns:repeat(2,1fr)}.v4-events-list .event-card{grid-template-columns:52px minmax(0,1fr)!important}.v4-events-list .event-delete{grid-column:2}.v4-hero-actions{flex-wrap:wrap}}
+body:not(.is-admin) .admin-only { display: none !important; }
 </style>
 
 </head>
@@ -13148,6 +13149,10 @@ body{background:
     let currentUser = null;
     let currentPermissions = {};
 
+    // Permisiunile vin de la server și includ excepțiile pentru conturi individuale.
+    function hasAdminAccess() { return currentPermissions?.admin === true; }
+    function currentAccessLevel() { return hasAdminAccess() ? Math.max(Number(currentUser?.rankLevel || 0), 11) : Number(currentUser?.rankLevel || 0); }
+
     let discordRoles = [];
 
     async function loadDiscordRoles() {
@@ -13759,10 +13764,7 @@ body{background:
         }
 
         const canManage =
-            Number(
-                currentUser?.rankLevel ||
-                0
-            ) >= 11;
+            hasAdminAccess();
 
         container.innerHTML =
             events
@@ -13955,10 +13957,7 @@ body{background:
             () => {
 
                 if (
-                    Number(
-                        currentUser?.rankLevel ||
-                        0
-                    ) < 11
+                    !hasAdminAccess()
                 ) {
                     return;
                 }
@@ -13984,10 +13983,7 @@ body{background:
                 event.preventDefault();
 
                 if (
-                    Number(
-                        currentUser?.rankLevel ||
-                        0
-                    ) < 11
+                    !hasAdminAccess()
                 ) {
                     return;
                 }
@@ -14262,10 +14258,7 @@ body{background:
 
 
             const isAdmin =
-                Number(
-                    currentUser.rankLevel ||
-                    0
-                ) >= 11;
+                hasAdminAccess();
 
 
             document.body.classList.toggle(
@@ -14405,10 +14398,7 @@ body{background:
     ========================================================== */
 
     function docsCanEdit() {
-        return Number(
-            currentUser?.rankLevel ||
-            0
-        ) >= 11;
+        return hasAdminAccess();
     }
 
 
@@ -15315,7 +15305,7 @@ const query =
 
         if (
             adminSections.includes(id) &&
-            Number(currentUser?.rankLevel || 0) < 11
+            !hasAdminAccess()
         ) {
             id = "overview";
         }
@@ -15467,10 +15457,7 @@ const query =
 
 
                             if (
-                                Number(
-                                    currentUser?.rankLevel ||
-                                    0
-                                ) >= 11
+                                hasAdminAccess()
                             ) {
 
                                 await loadAdminLeave();
@@ -15544,7 +15531,7 @@ const query =
 
                     if (
                         (section === "admin" || section === "blacklist") &&
-                        Number(currentUser?.rankLevel || 0) < 11
+                        !hasAdminAccess()
                     ) {
                         return;
                     }
@@ -16189,10 +16176,7 @@ const query =
             "click",
             async () => {
                 if (
-                    Number(
-                        currentUser?.rankLevel ||
-                        0
-                    ) < 11
+                    !hasAdminAccess()
                 ) {
                     return;
                 }
@@ -16333,10 +16317,7 @@ const query =
             async () => {
 
                 if (
-                    Number(
-                        currentUser?.rankLevel ||
-                        0
-                    ) < 11
+                    !hasAdminAccess()
                 ) {
                     return;
                 }
@@ -16619,10 +16600,7 @@ const query =
                 event.preventDefault();
 
                 if (
-                    Number(
-                        currentUser?.rankLevel ||
-                        0
-                    ) < 11
+                    !hasAdminAccess()
                 ) {
                     return;
                 }
@@ -16778,10 +16756,7 @@ const query =
                 currentPermissions?.testManagement ||
                 currentPermissions?.tester
             ) ||
-            Number(
-                currentUser?.rankLevel ||
-                0
-            ) >= 11 ||
+            hasAdminAccess() ||
             (
                 TESTER_POLITIE_ROLE_ID &&
                 roles.includes(
@@ -16810,10 +16785,7 @@ const query =
             Boolean(
                 tmData?.permissions?.leadership
             ) ||
-            Number(
-                currentUser?.rankLevel ||
-                0
-            ) >= 11;
+            hasAdminAccess();
 
         if (
             [
@@ -16847,10 +16819,7 @@ const query =
             Boolean(
                 tmData?.permissions?.leadership
             ) ||
-            Number(
-                currentUser?.rankLevel ||
-                0
-            ) >= 11;
+            hasAdminAccess();
 
         const testerAccess =
             Boolean(
@@ -16926,10 +16895,7 @@ const query =
             Boolean(
                 tmData?.permissions?.leadership
             ) ||
-            Number(
-                currentUser?.rankLevel ||
-                0
-            ) >= 11;
+            hasAdminAccess();
 
         if (
             isLeadership
@@ -17027,7 +16993,7 @@ const query =
         if (!container) return;
 
         const canEdit =
-            Number(currentUser?.rankLevel || 0) >= 11;
+            hasAdminAccess();
 
         if (!(tmData.categories || []).length) {
             container.innerHTML =
@@ -18553,7 +18519,7 @@ const query =
 
     function updateReportTypeAccess() {
         if (!reportTypeSelect) return;
-        const level = Number(currentUser?.rankLevel || 0);
+        const level = currentAccessLevel();
         reportTypeSelect.querySelectorAll("option[data-min-level]").forEach(option => {
             const allowed = level >= Number(option.dataset.minLevel || 0);
             option.hidden = !allowed;
@@ -19318,10 +19284,7 @@ const query =
     async function loadAdminReports() {
 
         if (
-            Number(
-                currentUser?.rankLevel ||
-                0
-            ) < 11
+            !hasAdminAccess()
         ) {
 
             return;
@@ -19559,10 +19522,7 @@ const query =
 
 
                                                             ${
-                                                                Number(
-                                                                    currentUser?.rankLevel ||
-                                                                    0
-                                                                ) >= 11 &&
+                                                                hasAdminAccess() &&
                                                                 String(
                                                                     member.id
                                                                 ) !==
@@ -20320,6 +20280,7 @@ const query =
         if (profileAccess) {
 
             profileAccess.textContent =
+                (String(profile.id || "") === String(currentUser?.id || "") && hasAdminAccess()) ||
                 Number(
                     profile.rankLevel ||
                     0
@@ -20596,10 +20557,7 @@ const query =
 
 
         const canManage =
-            Number(
-                currentUser?.rankLevel ||
-                0
-            ) >= 11 &&
+            hasAdminAccess() &&
 
             profile?.id &&
 
@@ -20689,10 +20647,7 @@ const query =
     ) {
 
         if (
-            Number(
-                currentUser?.rankLevel ||
-                0
-            ) < 11
+            !hasAdminAccess()
         ) {
 
             return;
@@ -20900,10 +20855,7 @@ const query =
             function () {
 
                 if (
-                    Number(
-                        currentUser?.rankLevel ||
-                        0
-                    ) < 11 ||
+                    !hasAdminAccess() ||
                     !viewedProfileData?.id
                 ) {
 
@@ -21196,10 +21148,7 @@ const query =
             async function () {
 
                 if (
-                    Number(
-                        currentUser?.rankLevel ||
-                        0
-                    ) < 11 ||
+                    !hasAdminAccess() ||
                     !viewedProfileData?.id
                 ) {
 
@@ -21237,10 +21186,7 @@ const query =
     ) {
 
         if (
-            Number(
-                currentUser?.rankLevel ||
-                0
-            ) < 11
+            !hasAdminAccess()
         ) {
 
             return;
@@ -21499,10 +21445,7 @@ const query =
 
 
         if (
-            Number(
-                currentUser?.rankLevel ||
-                0
-            ) >= 11
+            hasAdminAccess()
         ) {
 
             await loadAdminLeave();
@@ -23776,11 +23719,8 @@ const query =
                     "profile-view-access"
                 )
                 .textContent =
-                    Number(
-                        profile.rankLevel ||
-                        currentUser?.rankLevel ||
-                        0
-                    ) >= 11
+                    (String(profile.id || currentUser?.id || "") === String(currentUser?.id || "") && hasAdminAccess()) ||
+                    Number(profile.rankLevel || 0) >= 11
 
                         ? "CONDUCERE"
 
@@ -27352,7 +27292,7 @@ const query =
         .getElementById("admin-delete-all-reports")
         ?.addEventListener("click", async () => {
 
-            if (Number(currentUser?.rankLevel || 0) < 11) {
+            if (!hasAdminAccess()) {
                 return;
             }
 
