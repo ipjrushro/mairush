@@ -133,7 +133,10 @@ async function configureB2CorsForDirectUpload() {
     }
 }
 
-const ANNOUNCEMENT_CHANNEL_ID = "1528758228450672803";
+const POLICE_ANNOUNCEMENT_CHANNELS = Object.freeze({
+    POLITIE: "1528758226961567848",
+    COMUNE: "1528758228031246406"
+});
 
 // Canale Discord pentru rapoarte operaționale
 const RAID_REPORT_CHANNEL_ID = "1541732669409460345";
@@ -5268,6 +5271,20 @@ app.post(
                 ""
             ).trim();
 
+        const destination =
+            String(req.body.destination || "POLITIE")
+                .trim()
+                .toUpperCase();
+
+        const channelId =
+            POLICE_ANNOUNCEMENT_CHANNELS[destination];
+
+        if (!channelId) {
+            return res.status(400).json({
+                error: "Canalul de anunț selectat nu este valid."
+            });
+        }
+
 
         if (
             title.length < 2 ||
@@ -5300,12 +5317,12 @@ app.post(
         const authorName =
             req.session.user.displayName ||
             req.session.user.username ||
-            "Conducere DIICOT";
+            "Conducerea Poliției Române";
 
 
         const authorRank =
             req.session.user.rank ||
-            "CONDUCERE DIICOT";
+            "CONDUCERE POLIȚIA ROMÂNĂ";
 
 
         const avatarURL =
@@ -5350,7 +5367,9 @@ app.post(
                         "STRUCTURĂ",
 
                     value:
-                        "Direcția de Investigare a Infracțiunilor de Criminalitate Organizată și Terorism",
+                        destination === "COMUNE"
+                            ? "ANUNȚURI COMUNE"
+                            : "POLIȚIA ROMÂNĂ",
 
                     inline:
                         false
@@ -5360,7 +5379,9 @@ app.post(
             footer: {
 
                 text:
-                    "DIICOT • Rush România • Comunicat oficial"
+                    destination === "COMUNE"
+                        ? "Poliția Română • Anunț comun • Comunicat oficial"
+                        : "Poliția Română • Comunicat oficial"
             },
 
             timestamp:
@@ -5374,7 +5395,7 @@ app.post(
             const response =
                 await axios.post(
 
-                    `https://discord.com/api/v10/channels/${ANNOUNCEMENT_CHANNEL_ID}/messages`,
+                    `https://discord.com/api/v10/channels/${channelId}/messages`,
 
                     {
                         embeds: [
@@ -5469,7 +5490,13 @@ app.post(
                     true,
 
                 message:
-                    "Anunțul a fost trimis pe Discord.",
+                    destination === "COMUNE"
+                        ? "Anunțul comun a fost trimis pe Discord."
+                        : "Anunțul Poliției a fost trimis pe Discord.",
+
+                destination,
+
+                channelId,
 
                 discordMessageId:
                     response.data.id,
