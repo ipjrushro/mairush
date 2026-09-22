@@ -2384,21 +2384,21 @@ function mapLeaveRequest(row) {
 
 function getDocsRankForSlot(number) {
     const slot = Number(number);
-    if (slot === 0) return { name: "RESPONSABIL GUVERNAMENTALE", level: 14 };
-    if (slot === 1) return { name: "CHESTOR GENERAL", level: 13 };
-    if (slot === 2) return { name: "CHESTOR PRINCIPAL", level: 12 };
-    if (slot === 3) return { name: "CHESTOR SECUNDAR", level: 11 };
-    if (slot >= 4 && slot <= 5) return { name: "COMISAR ȘEF", level: 10 };
-    if (slot >= 6 && slot <= 7) return { name: "COMISAR", level: 9 };
-    if (slot >= 8 && slot <= 9) return { name: "SUB COMISAR", level: 8 };
-    if (slot >= 11 && slot <= 14) return { name: "INSPECTOR PRINCIPAL", level: 7 };
-    if (slot >= 100 && slot <= 103) return { name: "INSPECTOR", level: 6 };
-    if (slot >= 150 && slot <= 152) return { name: "SUB INSPECTOR", level: 5 };
-    if (slot >= 200 && slot <= 205) return { name: "AGENT ȘEF PRINCIPAL", level: 4 };
-    if (slot >= 300 && slot <= 308) return { name: "AGENT ȘEF ADJUNCT", level: 3 };
-    if (slot >= 400 && slot <= 409) return { name: "AGENT PRINCIPAL", level: 2 };
-    if (slot >= 500 && slot <= 515) return { name: "AGENT", level: 1 };
-    if (slot >= 600 && slot <= 660) return { name: "CADET", level: 0 };
+    if (slot === 0) return { name: "RESPONSABIL GUVERNAMENTALE", level: 15 };
+    if (slot === 1) return { name: "CHESTOR GENERAL", level: 14 };
+    if (slot === 2) return { name: "CHESTOR PRINCIPAL", level: 13 };
+    if (slot === 3) return { name: "CHESTOR SECUNDAR", level: 12 };
+    if (slot >= 4 && slot <= 5) return { name: "COMISAR ȘEF", level: 11 };
+    if (slot >= 6 && slot <= 7) return { name: "COMISAR", level: 10 };
+    if (slot >= 8 && slot <= 9) return { name: "SUB COMISAR", level: 9 };
+    if (slot >= 11 && slot <= 14) return { name: "INSPECTOR PRINCIPAL", level: 8 };
+    if (slot >= 100 && slot <= 103) return { name: "INSPECTOR", level: 7 };
+    if (slot >= 150 && slot <= 152) return { name: "SUB INSPECTOR", level: 6 };
+    if (slot >= 200 && slot <= 205) return { name: "AGENT ȘEF PRINCIPAL", level: 5 };
+    if (slot >= 300 && slot <= 308) return { name: "AGENT ȘEF ADJUNCT", level: 4 };
+    if (slot >= 400 && slot <= 409) return { name: "AGENT PRINCIPAL", level: 3 };
+    if (slot >= 500 && slot <= 515) return { name: "AGENT", level: 2 };
+    if (slot >= 600 && slot <= 660) return { name: "CADET", level: 1 };
     return { name: "", level: -1 };
 }
 
@@ -2769,14 +2769,20 @@ function requireAuth(
 }
 
 
-const DOCS_PERSONNEL_MANAGER_IDS = new Set([
+// Acces complet: COMISAR ȘEF+ și cele două persoane desemnate.
+const POLICE_FULL_ACCESS_IDS = new Set([
     "803998303230230538",
     "927528327156203560"
 ]);
 
-function hasDocsEditAccess(user) {
+function hasPoliceFullAccess(user) {
     if (!user) return false;
-    return Number(user.rankLevel || 0) >= 10 || DOCS_PERSONNEL_MANAGER_IDS.has(String(user.id || ""));
+    return Number(user.rankLevel || 0) >= 11 ||
+        POLICE_FULL_ACCESS_IDS.has(String(user.id || ""));
+}
+
+function hasDocsEditAccess(user) {
+    return hasPoliceFullAccess(user);
 }
 
 function requireDocsEditor(req, res, next) {
@@ -2807,12 +2813,7 @@ function requireAdmin(
             });
     }
 
-    if (
-        Number(
-            req.session.user.rankLevel ||
-            0
-        ) < 10
-    ) {
+    if (!hasPoliceFullAccess(req.session.user)) {
 
         return res
             .status(403)
@@ -2845,6 +2846,7 @@ function requireSanctionManager(
 
     // SUB COMISAR+ (rankLevel 7+) poate vedea, aplica și retrage sancțiuni.
     if (
+        !hasPoliceFullAccess(req.session.user) &&
         Number(
             req.session.user.rankLevel ||
             0
@@ -2878,10 +2880,7 @@ function hasTesterAccess(
             : [];
 
     return (
-        Number(
-            user.rankLevel ||
-            0
-        ) >= 10 ||
+        hasPoliceFullAccess(user) ||
         roles.includes(
             TESTER_DIICOT_ROLE_ID
         )
@@ -3426,10 +3425,9 @@ app.get(
                 : [];
 
         const isAdmin =
-            Number(
-                req.session.user.rankLevel ||
-                0
-            ) >= 10;
+            hasPoliceFullAccess(
+                req.session.user
+            );
 
         const isTester =
             roles.includes(
@@ -3472,12 +3470,6 @@ app.get(
         req,
         res
     ) => {
-
-        if (
-            !ensureSupabase(res)
-        ) {
-            return;
-        }
 
         try {
 
@@ -3573,30 +3565,30 @@ app.get(
             }
 
 
-            const {
-                data:
-                    profileRow,
+            // Profilul de bază trebuie să funcționeze chiar dacă Supabase
+            // este neconfigurat sau indisponibil temporar.
+            let profileRow = null;
 
-                error:
-                    profileError
-            } =
-                await supabase
-                    .from(
-                        "user_profiles"
-                    )
-                    .select(
-                        "*"
-                    )
-                    .eq(
-                        "user_id",
-                        userId
-                    )
-                    .maybeSingle();
+            if (supabase) {
+                try {
+                    const {
+                        data,
+                        error
+                    } =
+                        await supabase
+                            .from("user_profiles")
+                            .select("*")
+                            .eq("user_id", userId)
+                            .maybeSingle();
 
-
-            if (profileError) {
-
-                throw profileError;
+                    if (error) throw error;
+                    profileRow = data;
+                } catch (error) {
+                    console.error(
+                        "Profile Supabase Fallback:",
+                        error.message || error
+                    );
+                }
             }
 
 
@@ -3630,10 +3622,19 @@ app.get(
             req.session.user.avatar =
                 avatar;
 
-            const myReports =
-                await listB2Reports(
-                    userId
+            let myReports = [];
+
+            try {
+                myReports =
+                    await listB2Reports(
+                        userId
+                    );
+            } catch (error) {
+                console.error(
+                    "Profile Reports Fallback:",
+                    error.message || error
                 );
+            }
 
 
             const reportsWithImages =
@@ -3647,21 +3648,51 @@ app.get(
                 ).length;
 
 
-            const promotionEligibility =
-                await buildPromotionEligibility(
-                    userId,
-                    {
-                        id:
-                            req.session.user.rankRoleId,
+            const sessionRank = {
+                id:
+                    req.session.user.rankRoleId,
 
-                        name:
-                            req.session.user.rank,
+                name:
+                    req.session.user.rank || "MEMBRU POLIȚIE",
 
-                        level:
-                            req.session.user.rankLevel
-                    },
-                    myReports
+                level:
+                    Number(req.session.user.rankLevel || 0)
+            };
+
+            let promotionEligibility = null;
+
+            try {
+                promotionEligibility =
+                    await buildPromotionEligibility(
+                        userId,
+                        sessionRank,
+                        myReports
+                    );
+            } catch (error) {
+                console.error(
+                    "Profile Promotion Fallback:",
+                    error.message || error
                 );
+
+                promotionEligibility = {
+                    tracked: false,
+                    meritOnly: sessionRank.level >= 7,
+                    currentRank: sessionRank.name,
+                    nextRank: null,
+                    rankSince: null,
+                    daysInRank: 0,
+                    requirements: null,
+                    progress: {
+                        reports: myReports.length,
+                        raids: 0,
+                        trainings: 0
+                    },
+                    numericEligible: false,
+                    manualCriteria: [
+                        "Progresul va fi disponibil după reconectarea serviciului."
+                    ]
+                };
+            }
 
 
             res.json({
@@ -8983,10 +9014,9 @@ app.get(
 
 
             const canManage =
-                Number(
-                    req.session.user.rankLevel ||
-                    0
-                ) >= 10 &&
+                hasPoliceFullAccess(
+                    req.session.user
+                ) &&
                 !isOwnProfile;
 
 
@@ -11066,7 +11096,8 @@ app.post(
                     .trim();
                 const r = await supabase.from("docs_personnel").update({
                     discord_id: discordId, rank: cs.rank.name, rank_level: cs.rank.level, full_name: cleanName || member.user?.username || "Membru Poliție",
-                    internal_id: source.internal_id || "", callsign: cs.callsign, active: true, last_promotion: source.last_promotion || null, joined_at: source.joined_at || null,
+                    internal_id: source.internal_id || "", callsign: cs.callsign, active: true, last_promotion: source.last_promotion || null,
+                    joined_at: source.joined_at || member.joined_at || now,
                     cert_ftp: Boolean(source.cert_ftp), cert_radio: Boolean(source.cert_radio), cert_ac: Boolean(source.cert_ac), cert_hs: Boolean(source.cert_hs),
                     cert_air: Boolean(source.cert_air), cert_moto: Boolean(source.cert_moto), roles: source.roles || "", notes: source.notes || "",
                     penalty_points: Number(source.penalty_points || 0), discord: member.user?.username ? `@${member.user.username}` : discordId,
@@ -13215,7 +13246,7 @@ app.get(
             return res.json({
                 permissions: {
                     leadership:
-                        Number(req.session.user?.rankLevel || 0) >= 10,
+                        hasPoliceFullAccess(req.session.user),
                     tester:
                         hasTesterAccess(req.session.user)
                 },
