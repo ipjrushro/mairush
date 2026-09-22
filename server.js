@@ -745,8 +745,8 @@ async function readDutyRecord(userId) {
         if (status === 404 || name === "NoSuchKey" || name === "NotFound") {
             return { userId: String(userId), active: false, activeSince: null, sessions: [] };
         }
-        console.error("Duty B2 Read Error:", error?.message || error);
-        return { userId: String(userId), active: false, activeSince: null, sessions: [] };
+        console.error("Duty B2 Read Error:", dutyB2Key(userId), error?.message || error);
+        return { userId: String(userId), active: false, activeSince: null, sessions: [], readError: String(error?.message || error) };
     }
 }
 
@@ -777,7 +777,8 @@ function formatDutyDuration(ms) {
     const safe = Math.max(0, Number(ms || 0));
     const hours = Math.floor(safe / 3600000);
     const minutes = Math.floor((safe % 3600000) / 60000);
-    return `${hours}h ${minutes}m`;
+    const seconds = Math.floor((safe % 60000) / 1000);
+    return `${hours}h ${minutes}m ${seconds}s`;
 }
 
 
@@ -1135,7 +1136,8 @@ async function buildPromotionEligibility(
         dutyMs,
         dutyHours,
         dutyFormatted: formatDutyDuration(dutyMs),
-        dutyActive: Boolean(dutyRecord?.active)
+        dutyActive: Boolean(dutyRecord?.active),
+        dutyReadError: dutyRecord?.readError || null
     };
 
     const numericEligible =
