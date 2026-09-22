@@ -2409,6 +2409,22 @@ function getAllPoliceDocsCallsigns() {
     return values;
 }
 
+const POLICE_DOCS_RANK_NAMES = new Set(
+    DIICOT_ROLES.map(role => String(role.name || "").toUpperCase())
+);
+
+const GOVERNMENT_RESPONSIBLE_IDS = new Set([
+    "927528327156203560",
+    "803998303230230538"
+]);
+
+function isPoliceDocsRow(row) {
+    if (!row || !normalizePoliceCallsign(row.callsign)) return false;
+
+    const rank = String(row.rank || "").trim().toUpperCase();
+    return POLICE_DOCS_RANK_NAMES.has(rank) && !rank.includes("DIICOT");
+}
+
 function normalizePoliceCallsign(value) {
     const raw = String(value || "").trim().toUpperCase();
     const match = raw.match(/(?:\[)?(?:D-|P-)?(\d{1,3})(?:\])?/);
@@ -10178,6 +10194,7 @@ app.get(
                         data ||
                         []
                     )
+                        .filter(isPoliceDocsRow)
                         .map(
                             mapDocsRow
                         )
@@ -10999,25 +11016,34 @@ app.post(
             if (error) throw error;
             rows = rows || [];
 
-            // Un singur rând permanent pentru fiecare callsign. Nu ștergem sloturile.
+            // Păstrăm doar sloturile Poliției. Rândurile DIICOT din aceeași
+            // bază de date nu sunt afișate și nu sunt modificate.
             const byCallsign = new Map();
             for (const row of rows) {
+                if (!isPoliceDocsRow(row)) continue;
                 const cs = normalizePoliceCallsign(row.callsign);
-                if (cs && !byCallsign.has(cs.callsign)) byCallsign.set(cs.callsign, row);
+                if (!cs) continue;
+                const list = byCallsign.get(cs.callsign) || [];
+                list.push(row);
+                byCallsign.set(cs.callsign, list);
             }
 
             const missing = [];
             for (const number of validNumbers) {
                 const callsign = String(number).padStart(3, "0");
-                if (byCallsign.has(callsign)) continue;
                 const rank = getDocsRankForSlot(number);
-                missing.push({
-                    id: crypto.randomUUID(), discord_id: null, rank: rank.name, rank_level: rank.level,
-                    full_name: "", internal_id: "", callsign, active: false, last_promotion: null, joined_at: null,
-                    cert_ftp: false, cert_radio: false, cert_ac: false, cert_hs: false, cert_air: false, cert_moto: false,
-                    roles: "", notes: "", penalty_points: 0, discord: "", position: number,
-                    created_at: now, updated_at: now, updated_by_id: editorId, updated_by_name: editorName
-                });
+                const requiredSlots = number === 0 ? 2 : 1;
+                const existingSlots = (byCallsign.get(callsign) || []).length;
+
+                for (let index = existingSlots; index < requiredSlots; index++) {
+                    missing.push({
+                        id: crypto.randomUUID(), discord_id: null, rank: rank.name, rank_level: rank.level,
+                        full_name: "", internal_id: "", callsign, active: false, last_promotion: null, joined_at: null,
+                        cert_ftp: false, cert_radio: false, cert_ac: false, cert_hs: false, cert_air: false, cert_moto: false,
+                        roles: "", notes: "", penalty_points: 0, discord: "", position: number,
+                        created_at: now, updated_at: now, updated_by_id: editorId, updated_by_name: editorName
+                    });
+                }
             }
             if (missing.length) {
                 const r = await supabase.from("docs_personnel").insert(missing);
@@ -11030,12 +11056,37 @@ app.post(
 
             // Normalizează poziția/gradul sloturilor fără să mute oamenii arbitrar.
             for (const row of rows) {
+                if (!isPoliceDocsRow(row)) continue;
                 const cs = normalizePoliceCallsign(row.callsign);
                 if (!cs) continue;
                 const r = await supabase.from("docs_personnel").update({
                     callsign: cs.callsign, rank: cs.rank.name, rank_level: cs.rank.level, position: cs.number, updated_at: now
                 }).eq("id", row.id);
                 if (r.error) throw r.error;
+            }
+
+            // Callsign-ul 000 este rezervat exclusiv celor doi Responsabili
+            // Guvernamentale. Orice asociere veche greșită este eliberată.
+            ({ data: rows, error } = await supabase.from("docs_personnel").select("*"));
+            if (error) throw error;
+            rows = rows || [];
+
+            for (const row of rows) {
+                const cs = normalizePoliceCallsign(row.callsign);
+                const discordId = String(row.discord_id || "");
+                if (
+                    isPoliceDocsRow(row) &&
+                    cs?.callsign === "000" &&
+                    discordId &&
+                    !GOVERNMENT_RESPONSIBLE_IDS.has(discordId)
+                ) {
+                    const clearedRow = await supabase.from("docs_personnel").update({
+                        discord_id: null, full_name: "", internal_id: "", active: false,
+                        last_promotion: null, joined_at: null, discord: "", roles: "", notes: "",
+                        penalty_points: 0, updated_at: now
+                    }).eq("id", row.id);
+                    if (clearedRow.error) throw clearedRow.error;
+                }
             }
 
             const members = await getGuildMembersCached({ force: true });
@@ -11047,7 +11098,12 @@ app.post(
             ]);
 
             let assigned = 0, moved = 0, cleared = 0;
-            for (const member of members) {
+            const orderedMembers = [...members].sort((a, b) =>
+                Number(GOVERNMENT_RESPONSIBLE_IDS.has(String(b?.user?.id || ""))) -
+                Number(GOVERNMENT_RESPONSIBLE_IDS.has(String(a?.user?.id || "")))
+            );
+
+            for (const member of orderedMembers) {
                 if (member?.user?.bot) continue;
                 const roles = (member.roles || []).map(String);
                 if (!roles.some(id => policeRoleIds.has(id))) continue;
@@ -11056,12 +11112,30 @@ app.post(
                 const displayName = member.nick || member.user?.global_name || member.user?.username || "Membru Poliție";
                 const bracket = displayName.match(/\[(?:D-|P-)?(\d{1,3})\]/i);
                 const prefix = displayName.match(/^(?:D-|P-)?(\d{1,3})(?:\s*[-|•:]\s*|\s+)/i);
-                const cs = normalizePoliceCallsign(bracket?.[1] || prefix?.[1] || "");
+                const isGovernmentResponsible =
+                    GOVERNMENT_RESPONSIBLE_IDS.has(discordId);
+                const existingByDiscord = (rows || []).find(row =>
+                    isPoliceDocsRow(row) &&
+                    String(row.discord_id || "") === discordId
+                );
+                const cs = isGovernmentResponsible
+                    ? normalizePoliceCallsign("000")
+                    : (
+                        normalizePoliceCallsign(bracket?.[1] || prefix?.[1] || "") ||
+                        normalizePoliceCallsign(existingByDiscord?.callsign || "")
+                    );
                 if (!cs) continue;
+                if (cs.callsign === "000" && !isGovernmentResponsible) continue;
 
                 ({ data: rows, error } = await supabase.from("docs_personnel").select("*"));
                 if (error) throw error;
-                const target = (rows || []).find(r => normalizePoliceCallsign(r.callsign)?.callsign === cs.callsign);
+                const candidates = (rows || []).filter(r =>
+                    isPoliceDocsRow(r) &&
+                    normalizePoliceCallsign(r.callsign)?.callsign === cs.callsign
+                );
+                const target =
+                    candidates.find(r => String(r.discord_id || "") === discordId) ||
+                    candidates.find(r => !String(r.discord_id || "").trim());
                 if (!target) continue;
                 const old = (rows || []).find(r => String(r.discord_id || "") === discordId && r.id !== target.id);
 
@@ -11107,7 +11181,7 @@ app.post(
                 assigned++;
             }
 
-            return res.json({ success: true, created: missing.length, assigned, moved, cleared, totalSlots: validNumbers.length });
+            return res.json({ success: true, created: missing.length, assigned, moved, cleared, totalSlots: validNumbers.length + 1 });
         } catch (error) {
             console.error("DOCS Sync Error:", error.response?.data || error.message || error);
             return res.status(500).json({ error: "Personalul DOCS Poliție nu a putut fi sincronizat." });
