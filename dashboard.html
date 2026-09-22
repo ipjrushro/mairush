@@ -8791,6 +8791,46 @@
         #docs .docs-cert-grid{grid-template-columns:repeat(3,minmax(30px,1fr)) !important;gap:5px !important;}
         #docs .docs-cert-item{min-height:30px !important;}
         #docs .docs-table-scroll{max-height:72vh;overflow:auto !important;}
+
+/* =========================================================
+   GHID GENERAL — POLITIA ROMANA
+========================================================= */
+.guide-page{display:flex;flex-direction:column;gap:20px}
+.guide-hero{position:relative;overflow:hidden;border:1px solid rgba(240,184,55,.18);border-radius:24px;padding:30px;background:linear-gradient(135deg,rgba(240,184,55,.08),rgba(10,22,34,.86) 48%,rgba(8,17,27,.96));box-shadow:0 22px 55px rgba(0,0,0,.22)}
+.guide-hero:after{content:"POLITIA";position:absolute;right:24px;top:50%;transform:translateY(-50%);font-size:72px;font-weight:900;letter-spacing:.14em;color:rgba(255,255,255,.025);pointer-events:none}
+.guide-kicker{font-size:10px;font-weight:900;letter-spacing:.2em;color:#eab83e;margin-bottom:10px}
+.guide-hero h2{margin:0 0 9px;font-size:30px;color:#f6f8fb}
+.guide-hero p{max-width:780px;margin:0;color:#7f93a8;line-height:1.65}
+.guide-tabs{display:flex;gap:10px;flex-wrap:wrap}
+.guide-tab{border:1px solid rgba(118,145,171,.18);background:#091522;color:#8297aa;border-radius:12px;padding:11px 15px;font:inherit;font-size:11px;font-weight:900;letter-spacing:.08em;cursor:pointer;transition:.2s}
+.guide-tab:hover,.guide-tab.active{color:#f4c34d;border-color:rgba(240,184,55,.38);background:rgba(240,184,55,.08);transform:translateY(-1px)}
+.guide-panel{display:none}
+.guide-panel.active{display:block}
+.guide-section-card{border:1px solid rgba(118,145,171,.14);background:linear-gradient(180deg,rgba(10,22,34,.92),rgba(6,15,24,.96));border-radius:20px;padding:24px;box-shadow:0 18px 44px rgba(0,0,0,.18)}
+.guide-section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;padding-bottom:17px;border-bottom:1px solid rgba(118,145,171,.12)}
+.guide-section-head small{display:block;color:#eab83e;font-size:9px;font-weight:900;letter-spacing:.18em;margin-bottom:7px}
+.guide-section-head h3{margin:0;color:#edf3f8;font-size:20px}
+.guide-alert{border:1px solid rgba(240,184,55,.22);background:rgba(240,184,55,.06);border-radius:14px;padding:14px 16px;color:#c9d2db;line-height:1.55;margin-bottom:20px}
+.guide-alert strong{color:#f4c34d}
+.weapon-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.weapon-rank{border:1px solid rgba(118,145,171,.12);background:rgba(4,12,20,.48);border-radius:16px;padding:17px}
+.weapon-rank-top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.weapon-rank-badge{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:rgba(240,184,55,.08);border:1px solid rgba(240,184,55,.2);color:#f4c34d;font-weight:900}
+.weapon-rank h4{margin:0;color:#eaf0f5;font-size:13px;letter-spacing:.04em}
+.weapon-list{display:flex;flex-wrap:wrap;gap:7px}
+.weapon-chip{font-size:10px;font-weight:800;color:#9eb0bf;padding:7px 9px;border-radius:8px;border:1px solid rgba(118,145,171,.12);background:rgba(14,28,42,.58)}
+.guide-steps{display:flex;flex-direction:column;gap:12px}
+.guide-step{display:grid;grid-template-columns:42px 1fr;gap:14px;border:1px solid rgba(118,145,171,.12);background:rgba(4,12,20,.45);border-radius:16px;padding:16px}
+.guide-step-num{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#f4c34d;background:rgba(240,184,55,.07);border:1px solid rgba(240,184,55,.2);font-size:14px;font-weight:900}
+.guide-step h4{margin:1px 0 9px;color:#edf3f8;font-size:14px}
+.guide-step p,.guide-step li{color:#8fa2b3;line-height:1.6;font-size:12px}
+.guide-step ul{margin:0;padding-left:18px}
+.guide-quote{margin-top:10px;padding:11px 13px;border-left:2px solid #eab83e;background:rgba(240,184,55,.04);border-radius:0 9px 9px 0;color:#cbd5dd;font-size:12px;line-height:1.6}
+.guide-special-title{margin:22px 0 12px;color:#f4c34d;font-size:11px;font-weight:900;letter-spacing:.16em}
+.guide-note{margin-top:10px;color:#71879a;font-size:11px}
+.guide-home-card .home-action-icon{color:#f4c34d!important}
+@media(max-width:760px){.weapon-grid{grid-template-columns:1fr}.guide-hero{padding:22px}.guide-hero h2{font-size:24px}.guide-hero:after{display:none}.guide-step{grid-template-columns:36px 1fr}.guide-step-num{width:36px;height:36px}}
+
 </style>
 
 <style id="sanction-premium-styles">
@@ -11593,6 +11633,20 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
 
                         <button
                             type="button"
+                            class="home-action-card guide-home-card"
+                            data-home-section="general-guide"
+                        >
+                            <div class="home-action-icon">▦</div>
+                            <h3>GHID GENERAL</h3>
+                            <p>
+                                Regulament armament, procedura Traffic Stop și pașii
+                                necesari pentru omologarea unui vehicul.
+                            </p>
+                            <span class="home-action-arrow">→</span>
+                        </button>
+
+                        <button
+                            type="button"
                             class="home-action-card gold sanction-manager-card"
                             id="open-sanction-modal"
                         >
@@ -11614,6 +11668,179 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
 
 
 
+
+
+            <!-- =====================================================
+                 GHID GENERAL — POLIȚIA ROMÂNĂ
+            ====================================================== -->
+            <section id="general-guide" class="dashboard-section">
+                <div class="guide-page">
+                    <div class="guide-hero">
+                        <div class="guide-kicker">INSPECTORATUL DE POLIȚIE LOS SANTOS • GHID OPERAȚIONAL</div>
+                        <h2>Ghid General</h2>
+                        <p>
+                            Informații operative pentru membrii departamentului:
+                            armamentul permis pe grade, procedura Traffic Stop și
+                            pașii necesari pentru omologarea unui vehicul.
+                        </p>
+                    </div>
+
+                    <div class="guide-tabs">
+                        <button type="button" class="guide-tab active" data-guide-tab="weapons">ARMAMENT</button>
+                        <button type="button" class="guide-tab" data-guide-tab="traffic">TRAFFIC STOP</button>
+                        <button type="button" class="guide-tab" data-guide-tab="homologation">OMOLOGĂRI</button>
+                    </div>
+
+                    <div class="guide-panel active" data-guide-panel="weapons">
+                        <div class="guide-section-card">
+                            <div class="guide-section-head">
+                                <div>
+                                    <small>REGULAMENT INTERN</small>
+                                    <h3>Regulament Armament – Inspectoratul de Poliție Los Santos</h3>
+                                </div>
+                            </div>
+
+                            <div class="guide-alert">
+                                Vă rugăm să consultați armamentul permis pentru fiecare grad.
+                                Respectarea acestui regulament este obligatorie pentru toți membrii departamentului.
+                                <br><strong>IMPORTANT:</strong> Începând cu gradul de <strong>Sub-Inspector</strong>,
+                                aveți acces la întreg armamentul departamentului.
+                            </div>
+
+                            <div class="weapon-grid">
+                                <article class="weapon-rank">
+                                    <div class="weapon-rank-top"><span class="weapon-rank-badge">C</span><h4>CADET</h4></div>
+                                    <div class="weapon-list">
+                                        <span class="weapon-chip">Taser</span><span class="weapon-chip">AP Pistol</span><span class="weapon-chip">Baston</span>
+                                    </div>
+                                </article>
+
+                                <article class="weapon-rank">
+                                    <div class="weapon-rank-top"><span class="weapon-rank-badge">A</span><h4>AGENT</h4></div>
+                                    <div class="weapon-list">
+                                        <span class="weapon-chip">AP Pistol</span><span class="weapon-chip">Revolver</span><span class="weapon-chip">Taser</span><span class="weapon-chip">Baston</span>
+                                    </div>
+                                </article>
+
+                                <article class="weapon-rank">
+                                    <div class="weapon-rank-top"><span class="weapon-rank-badge">AP</span><h4>AGENT PRINCIPAL</h4></div>
+                                    <div class="weapon-list">
+                                        <span class="weapon-chip">Deagle</span><span class="weapon-chip">Assault SMG</span><span class="weapon-chip">Revolver</span><span class="weapon-chip">Taser</span><span class="weapon-chip">Baston</span>
+                                    </div>
+                                </article>
+
+                                <article class="weapon-rank">
+                                    <div class="weapon-rank-top"><span class="weapon-rank-badge">AȘA</span><h4>AGENT ȘEF ADJUNCT</h4></div>
+                                    <div class="weapon-list">
+                                        <span class="weapon-chip">Assault Rifle Militar</span><span class="weapon-chip">Pump Shotgun</span><span class="weapon-chip">Assault Shotgun</span><span class="weapon-chip">Assault SMG</span><span class="weapon-chip">Revolver</span><span class="weapon-chip">Taser</span><span class="weapon-chip">Baston</span>
+                                    </div>
+                                </article>
+
+                                <article class="weapon-rank">
+                                    <div class="weapon-rank-top"><span class="weapon-rank-badge">AȘP</span><h4>AGENT ȘEF PRINCIPAL</h4></div>
+                                    <div class="weapon-list">
+                                        <span class="weapon-chip">Assault Rifle Militar</span><span class="weapon-chip">Bullpup Rifle MK2</span><span class="weapon-chip">Assault SMG</span><span class="weapon-chip">AP Pistol</span><span class="weapon-chip">Deagle</span><span class="weapon-chip">Revolver</span><span class="weapon-chip">Taser</span><span class="weapon-chip">Baston</span>
+                                    </div>
+                                </article>
+
+                                <article class="weapon-rank">
+                                    <div class="weapon-rank-top"><span class="weapon-rank-badge">SI+</span><h4>SUB-INSPECTOR ȘI GRADELE SUPERIOARE</h4></div>
+                                    <div class="weapon-list">
+                                        <span class="weapon-chip">Acces la întreg armamentul departamentului</span>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guide-panel" data-guide-panel="traffic">
+                        <div class="guide-section-card">
+                            <div class="guide-section-head">
+                                <div><small>PROCEDURĂ OPERAȚIONALĂ</small><h3>Ghid Traffic Stop</h3></div>
+                            </div>
+
+                            <div class="guide-steps">
+                                <article class="guide-step">
+                                    <div class="guide-step-num">01</div>
+                                    <div><h4>🔦 Inițiază oprirea</h4><ul><li>Pornește sirena și luminile.</li><li>Trage mașina într-un loc sigur.</li><li>Anunță pe cască în caz de nevoie.</li></ul></div>
+                                </article>
+                                <article class="guide-step">
+                                    <div class="guide-step-num">02</div>
+                                    <div><h4>🚓 Abordează mașina</h4><ul><li>Apropie-te cu grijă, din partea șoferului.</li><li>Ține mâna pe armă dacă RP-ul o cere.</li><li>Asigură perimetrul.</li></ul></div>
+                                </article>
+                                <article class="guide-step">
+                                    <div class="guide-step-num">03</div>
+                                    <div><h4>🗣️ Legitimează-te</h4><div class="guide-quote">„Bună ziua, [Grad] [Nume] din cadrul IPJ Los Santos.”</div></div>
+                                </article>
+                                <article class="guide-step">
+                                    <div class="guide-step-num">04</div>
+                                    <div><h4>📄 Cere actele</h4><ul><li>Buletin.</li><li>Permis de conducere.</li><li>Asigurarea.</li></ul></div>
+                                </article>
+                                <article class="guide-step">
+                                    <div class="guide-step-num">05</div>
+                                    <div>
+                                        <h4>⚖️ Decizia</h4>
+                                        <ul>
+                                            <li>Totul este în regulă → avertisment verbal sau urezi „Drum bun!”.</li>
+                                            <li>Abateri minore → amendă; comunici motivul și suma în timp ce rulezi o animație de scris, de exemplu <b>/e note</b> sau <b>/e tablet</b>.</li>
+                                            <li>Probleme grave → arest și confiscarea obiectelor ilegale, dacă acestea există.</li>
+                                            <li>Dacă nu ai loc pentru transportul spre secție, cheamă un echipaj: „Am nevoie de un 10-78 la următorul BK.”</li>
+                                        </ul>
+                                    </div>
+                                </article>
+                            </div>
+
+                            <div class="guide-special-title">⚠ SITUAȚII SPECIALE</div>
+                            <div class="guide-steps">
+                                <article class="guide-step">
+                                    <div class="guide-step-num">A</div>
+                                    <div><h4>🚫 Șoferul nu are actele la el</h4><div class="guide-quote">„Conducerea fără acte (permis, talon etc.) este o abatere gravă. Va trebui să coborâți din vehicul și să mă urmați la secție pentru identificare.”</div><p>Se aplică sancțiuni în funcție de lipsurile identificate.</p></div>
+                                </article>
+                                <article class="guide-step">
+                                    <div class="guide-step-num">B</div>
+                                    <div><h4>🏃‍♂️ Șoferul fuge de la fața locului</h4><p>Acționează rapid, dar coordonat.</p><div class="guide-quote">„Suspect fugar de la Traffic Stop, [locație], vehicul [descriere]. Solicit backup.”<br>Dacă începe urmărirea: „Am un 10-80 în desfășurare pe un [vehicul] la ultimul BK.”</div><p>Urmează protocolul de urmărire: sirene, comunicare și blocaje.</p></div>
+                                </article>
+                                <article class="guide-step">
+                                    <div class="guide-step-num">C</div>
+                                    <div><h4>😡 Șoferul devine agresiv verbal</h4><p>Menține calmul.</p><div class="guide-quote">„Vă rog să cooperați. Orice insultă adusă unui agent poate duce la sancțiuni suplimentare.”</div></div>
+                                </article>
+                                <article class="guide-step">
+                                    <div class="guide-step-num">D</div>
+                                    <div><h4>🪪 Șoferul refuză să se legitimeze</h4><div class="guide-quote">„Refuzul de a vă identifica constituie o abatere. Dacă nu prezentați actele, voi fi nevoit să vă conduc la secție pentru identificare.”</div><p>Dacă refuzul continuă → imobilizare și transport la secție.</p></div>
+                                </article>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="guide-panel" data-guide-panel="homologation">
+                        <div class="guide-section-card">
+                            <div class="guide-section-head">
+                                <div><small>PROCEDURĂ DOCUMENTARE</small><h3>Omologări</h3></div>
+                            </div>
+
+                            <div class="guide-steps">
+                                <article class="guide-step">
+                                    <div class="guide-step-num">01</div>
+                                    <div><h4>Buletinul persoanei</h4><p>Iei buletinul persoanei și îi faci o poză. Nu trebuie rulat că faci poza la buletin.</p></div>
+                                </article>
+                                <article class="guide-step">
+                                    <div class="guide-step-num">02</div>
+                                    <div><h4>Fotografii vehicul</h4><p>Folosești <b>/camera</b> și faci poze mașinii din față, din spate și din ambele părți: dreapta și stânga.</p></div>
+                                </article>
+                                <article class="guide-step">
+                                    <div class="guide-step-num">03</div>
+                                    <div><h4>Numărul de înmatriculare</h4><p>Folosești <b>/tablet</b> și rulezi că notezi numărul de înmatriculare de la spatele mașinii.</p></div>
+                                </article>
+                                <article class="guide-step">
+                                    <div class="guide-step-num">04</div>
+                                    <div><h4>Încarcă raportul</h4><p>Pe site mergi la <b>Raport nou → Omologare</b> și completezi raportul cu dovezile realizate.</p></div>
+                                </article>
+                            </div>
+                            <div class="guide-note">Pozele demonstrative pot fi adăugate ulterior în această secțiune fără să fie schimbată structura ghidului.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             <!-- =====================================================
                  CERINȚE UP — POLIȚIA ROMÂNĂ
@@ -32816,5 +33043,21 @@ document.addEventListener('DOMContentLoaded',()=>{
         }
     }, 15000);
 </script>
+
+<script>
+document.addEventListener("click", function(event) {
+    const tab = event.target.closest("[data-guide-tab]");
+    if (!tab) return;
+
+    const name = tab.getAttribute("data-guide-tab");
+    document.querySelectorAll("[data-guide-tab]").forEach(btn => {
+        btn.classList.toggle("active", btn === tab);
+    });
+    document.querySelectorAll("[data-guide-panel]").forEach(panel => {
+        panel.classList.toggle("active", panel.getAttribute("data-guide-panel") === name);
+    });
+});
+</script>
+
 </body>
 </html>
