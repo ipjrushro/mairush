@@ -43,10 +43,10 @@ const REDIRECT_URI = process.env.DISCORD_REDIRECT_URI;
 const GUILD_ID = process.env.DISCORD_GUILD_ID;
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 
-const CALLSIGN_LOG_CHANNEL_ID = "1547395877503500318";
+const CALLSIGN_LOG_CHANNEL_ID = "1549734703915991130";
 const CALLSIGN_DASHBOARD_URL =
     process.env.CALLSIGN_DASHBOARD_URL ||
-    "https://diicot-07hy.onrender.com/dashboard.html";
+    "https://mairush-hilz.onrender.com/dashboard";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -11546,7 +11546,7 @@ const FACTION_WARN_ROLE_IDS = {
     5: "1528758226319966346"
 };
 
-const INFO_SANCTIONS_CHANNEL_ID = "1544679685030682664";
+const INFO_SANCTIONS_CHANNEL_ID = "1549734760702812300";
 const BLACKLIST_CHANNEL_ID = "1542990688814243981";
 
 async function syncFactionWarnDiscordRole(userId, level) {
@@ -11648,12 +11648,12 @@ async function sendSanctionRevokedInfoMessage({
             },
             {
                 name: "Retrasă de",
-                value: `${removedByName || "Conducerea DIICOT"}\n${removedByRank || "CONDUCERE DIICOT"}`,
+                value: `${removedByName || "Conducerea Poliției"}\n${removedByRank || "CONDUCERE POLIȚIA ROMÂNĂ"}`,
                 inline: true
             }
         ],
         footer: {
-            text: "DIICOT • Centru de Comandă • Rush România"
+            text: "Poliția Română • Centru de Comandă • Rush România"
         },
         timestamp: new Date().toISOString()
     };
@@ -11720,12 +11720,12 @@ async function sendSanctionInfoMessage({
             },
             {
                 name: "Aplicată de",
-                value: `${appliedByName || "Conducerea DIICOT"}\n${appliedByRank || "CONDUCERE DIICOT"}`,
+                value: `${appliedByName || "Conducerea Poliției"}\n${appliedByRank || "CONDUCERE POLIȚIA ROMÂNĂ"}`,
                 inline: true
             }
         ],
         footer: {
-            text: "DIICOT • Sistem sancțiuni"
+            text: "Poliția Română • Sistem sancțiuni"
         },
         timestamp: new Date().toISOString()
     };
@@ -12906,10 +12906,10 @@ app.patch(
 
             if (remainingError) throw remainingError;
 
-            const activeFw = (remainingRows || []).reduce(
+            const activeFw = Math.min(5, (remainingRows || []).reduce(
                 (total, row) => total + Number(row.fw_count || 0),
                 0
-            );
+            ));
 
             let roleSynced = false;
             let roleSyncError = null;
@@ -12927,18 +12927,18 @@ app.patch(
             const removedByName =
                 req.session.user.displayName ||
                 req.session.user.username ||
-                "Conducerea DIICOT";
+                "Conducerea Poliției";
 
             const removedByRank =
                 req.session.user.rank ||
-                "CONDUCERE DIICOT";
+                "CONDUCERE POLIȚIA ROMÂNĂ";
 
             let dmSent = false;
             let dmError = null;
 
             try {
                 const text = [
-                    "✅ **NOTIFICARE SANCȚIUNE — DIICOT**",
+                    "✅ **NOTIFICARE SANCȚIUNE — POLIȚIA ROMÂNĂ**",
                     "",
                     sanction.type === "OUT"
                         ? "Sancțiunea **OUT** a fost retrasă."
@@ -13157,23 +13157,16 @@ app.post(
                         0
                     );
 
-                if (
-                    currentFw +
-                    fwCount >
-                    5
-                ) {
-
-                    return res
-                        .status(400)
-                        .json({
-                            error:
-                                `Membrul are deja ${currentFw}/5 FW active. Nu poți depăși limita de 5.`
-                        });
+                if (currentFw >= 5) {
+                    return res.status(400).json({
+                        error: "Membrul are deja 5/5 FW active."
+                    });
                 }
 
-                activeFw =
-                    currentFw +
-                    fwCount;
+                // Aplicăm doar diferența disponibilă până la 5/5.
+                // Exemplu: 2/5 + cerere 3 FW = 5/5, niciodată 7/5.
+                fwCount = Math.min(fwCount, 5 - currentFw);
+                activeFw = Math.min(5, currentFw + fwCount);
             }
 
             if (
@@ -13261,8 +13254,8 @@ app.post(
                 throw error;
             }
 
-            const appliedByName = req.session.user.displayName || req.session.user.username || "Conducerea DIICOT";
-            const appliedByRank = req.session.user.rank || "CONDUCERE DIICOT";
+            const appliedByName = req.session.user.displayName || req.session.user.username || "Conducerea Poliției";
+            const appliedByRank = req.session.user.rank || "CONDUCERE POLIȚIA ROMÂNĂ";
 
             // Sincronizează automat rolul de Faction Warn pe Discord.
             // OUT folosește rolul 5/5 (OUT).
@@ -13303,8 +13296,8 @@ app.post(
             let dmError = null;
             try {
                 const dmLines = type === "OUT"
-                    ? ["📋 **NOTIFICARE SANCȚIUNE — DIICOT**", "", "Ai primit sancțiunea **OUT**.", `**Motiv:** ${reason}`, `**Aplicată de:** ${appliedByName} — ${appliedByRank}`, "", "Această sancțiune a fost înregistrată în sistemul DIICOT."]
-                    : ["⚠️ **NOTIFICARE SANCȚIUNE — DIICOT**", "", `Ai primit **${fwCount} Faction Warn**.`, `**Situație activă:** ${activeFw}/5 FW`, `**Motiv:** ${reason}`, `**Aplicată de:** ${appliedByName} — ${appliedByRank}`, "", "Această sancțiune a fost înregistrată în sistemul DIICOT."];
+                    ? ["📋 **NOTIFICARE SANCȚIUNE — POLIȚIA ROMÂNĂ**", "", "Ai primit sancțiunea **OUT**.", `**Motiv:** ${reason}`, `**Aplicată de:** ${appliedByName} — ${appliedByRank}`, "", "Această sancțiune a fost înregistrată în sistemul Poliției Române."]
+                    : ["⚠️ **NOTIFICARE SANCȚIUNE — POLIȚIA ROMÂNĂ**", "", `Ai primit **${fwCount} Faction Warn**.`, `**Situație activă:** ${activeFw}/5 FW`, `**Motiv:** ${reason}`, `**Aplicată de:** ${appliedByName} — ${appliedByRank}`, "", "Această sancțiune a fost înregistrată în sistemul Poliției Române."];
                 await sendDiscordDM(targetId, dmLines.join("\n"));
                 dmSent = true;
             }
