@@ -44,9 +44,14 @@ const GUILD_ID = process.env.DISCORD_GUILD_ID;
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 
 const CALLSIGN_LOG_CHANNEL_ID = "1547395877503500318";
+const PUBLIC_BASE_URL = String(
+    process.env.PUBLIC_BASE_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    ""
+).replace(/\/$/, "");
 const CALLSIGN_DASHBOARD_URL =
     process.env.CALLSIGN_DASHBOARD_URL ||
-    "https://diicot-07hy.onrender.com/dashboard.html";
+    (PUBLIC_BASE_URL ? `${PUBLIC_BASE_URL}/dashboard` : "/dashboard");
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -87,7 +92,7 @@ if (
 // ======================================================
 const B2_DIRECT_UPLOAD_ORIGIN =
     process.env.B2_DIRECT_UPLOAD_ORIGIN ||
-    "https://diicot-07hy.onrender.com";
+    PUBLIC_BASE_URL;
 
 async function configureB2CorsForDirectUpload() {
     if (
@@ -95,7 +100,8 @@ async function configureB2CorsForDirectUpload() {
         !B2_REGION ||
         !B2_ENDPOINT ||
         !B2_KEY_ID ||
-        !B2_APPLICATION_KEY
+        !B2_APPLICATION_KEY ||
+        !B2_DIRECT_UPLOAD_ORIGIN
     ) {
         console.warn(
             "[BACKBLAZE B2 CORS] Configurarea CORS a fost omisă: lipsesc variabile B2_*."
@@ -2977,6 +2983,11 @@ function requireTester(
 // ======================================================
 // PAGINI
 // ======================================================
+
+// Endpoint simplu pentru verificarea serviciului in Render.
+app.get("/health", (req, res) => {
+    res.status(200).json({ ok: true });
+});
 
 app.get(
     "/",
