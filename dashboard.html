@@ -12100,24 +12100,6 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
             <span class="report-type-option-check">✓</span>
         </button>
     
-        <button type="button" class="report-type-option" data-report-value="JAFURI">
-            <span class="report-type-option-icon">◆</span>
-            <span class="report-type-option-copy">
-                <strong>JAFURI</strong>
-                <small>Intervenție la jaf</small>
-            </span>
-            <span class="report-type-option-check">✓</span>
-        </button>
-    
-        <button type="button" class="report-type-option" data-report-value="PATRULA">
-            <span class="report-type-option-icon">◎</span>
-            <span class="report-type-option-copy">
-                <strong>PATRULĂ</strong>
-                <small>Activitate de patrulare</small>
-            </span>
-            <span class="report-type-option-check">✓</span>
-        </button>
-    
         <button type="button" class="report-type-option" data-report-value="PERCHEZITIE">
             <span class="report-type-option-icon">⌕</span>
             <span class="report-type-option-copy">
@@ -12127,21 +12109,21 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
             <span class="report-type-option-check">✓</span>
         </button>
     
-        <button type="button" class="report-type-option" data-report-value="VERIFICARE ZONA">
-            <span class="report-type-option-icon">◫</span>
-            <span class="report-type-option-copy">
-                <strong>VERIFICARE ZONĂ</strong>
-                <small>Control și verificare</small>
-            </span>
+        <button type="button" class="report-type-option" data-report-value="BULETINE VAMA">
+            <span class="report-type-option-icon">▦</span>
+            <span class="report-type-option-copy"><strong>BULETINE VAMĂ</strong><small>Înregistrare document vamal</small></span>
             <span class="report-type-option-check">✓</span>
         </button>
-    
-        <button type="button" class="report-type-option" data-report-value="FOCURI DE ARMA">
-            <span class="report-type-option-icon">✦</span>
-            <span class="report-type-option-copy">
-                <strong>FOCURI DE ARMĂ</strong>
-                <small>Incident armat</small>
-            </span>
+
+        <button type="button" class="report-type-option" data-report-value="OMOLOGARI">
+            <span class="report-type-option-icon">◇</span>
+            <span class="report-type-option-copy"><strong>OMOLOGĂRI</strong><small>Modificări și costuri omologare</small></span>
+            <span class="report-type-option-check">✓</span>
+        </button>
+
+        <button type="button" class="report-type-option" data-report-value="SANCTIUNI">
+            <span class="report-type-option-icon">§</span>
+            <span class="report-type-option-copy"><strong>SANCȚIUNI</strong><small>Amenzi și sancțiuni cu închisoarea</small></span>
             <span class="report-type-option-check">✓</span>
         </button>
     </div>
@@ -12154,11 +12136,10 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                                     <option value="DOVADA RAZIE">DOVADĂ RAZIE</option>
                                     <option value="DOVADA ANTRENAMENT">DOVADĂ ANTRENAMENT</option>
                                     <option value="REGRUPARE">REGRUPARE</option>
-                                    <option value="JAFURI">JAFURI</option>
-                                    <option value="PATRULA">PATRULĂ</option>
                                     <option value="PERCHEZITIE">PERCHEZIȚIE</option>
-                                    <option value="VERIFICARE ZONA">VERIFICARE ZONĂ</option>
-                                    <option value="FOCURI DE ARMA">FOCURI DE ARMĂ</option>
+                                    <option value="BULETINE VAMA">BULETINE VAMĂ</option>
+                                    <option value="OMOLOGARI">OMOLOGĂRI</option>
+                                    <option value="SANCTIUNI">SANCȚIUNI</option>
                                 </select></div>
 
                             </div>
@@ -12192,6 +12173,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                                         type="button"
                                         class="report-department-tab active"
                                         data-report-department="DIICOT"
+                                        data-preserve-diicot
                                     >
                                         <span>◆</span>
                                         DIICOT
@@ -12257,11 +12239,42 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                         </div>
 
 
-                        <div class="report-field-card">
+                        <div class="report-field-card" id="report-title-card">
                             <div class="report-field-icon report-title-icon">T</div>
                             <div class="report-field-body">
                                 <label for="report-title">TITLU</label>
                                 <input type="text" id="report-title" name="title" maxlength="120" placeholder="Ex: Razie organizație..." required>
+                            </div>
+                        </div>
+
+                        <div class="report-special-fields" id="report-special-fields" style="display:none;">
+                            <div class="report-special-group" data-special-type="BULETINE VAMA">
+                                <h3>BULETIN VAMAL</h3>
+                                <label>Nume și prenume titular</label>
+                                <input id="report-customs-name" maxlength="120" placeholder="Ex: Mihai Vlăduț">
+                                <label>CNP</label>
+                                <input id="report-customs-cnp" maxlength="30" placeholder="CNP-ul titularului">
+                                <label>Buletin / date document</label>
+                                <textarea id="report-customs-document" maxlength="1500" placeholder="Seria, numărul și informațiile buletinului vamal"></textarea>
+                            </div>
+
+                            <div class="report-special-group" data-special-type="OMOLOGARI">
+                                <h3>FIȘĂ OMOLOGARE</h3>
+                                <label>Nume</label><input id="report-homologation-name" maxlength="120" placeholder="Ex: Mihai Vlăduț">
+                                <label>Numele celui care a făcut omologarea</label><input id="report-homologation-agent" maxlength="120" placeholder="Ex: Richard Thompson">
+                                <label>CNP</label><input id="report-homologation-cnp" maxlength="30" placeholder="CNP">
+                                <label>Modificări</label><textarea id="report-homologation-modifications" maxlength="1500" placeholder="Ex: Xenoane / Geamuri fumurii / Neoane"></textarea>
+                                <div class="report-price-note">COST: <strong>500.000 $</strong> pentru fiecare modificare</div>
+                            </div>
+
+                            <div class="report-special-group" data-special-type="SANCTIUNI">
+                                <h3>PROCES-VERBAL SANCȚIUNE</h3>
+                                <label>Nume și prenume agent</label><input id="report-sanction-agent" maxlength="120" placeholder="Ex: Basarab Emanuel">
+                                <label>Nume și prenume suspect</label><input id="report-sanction-suspect" maxlength="120" placeholder="Ex: Valverde Leonardo">
+                                <label>Motiv sancțiune (amendă)</label><textarea id="report-sanction-fine-reason" maxlength="1000" placeholder="Ex: Art. 110, Art. 404, Art. 300"></textarea>
+                                <label>Sancțiune (amendă)</label><input id="report-sanction-fine" maxlength="50" placeholder="Ex: 190.000 $">
+                                <label>Motiv sancțiune (închisoare)</label><textarea id="report-sanction-jail-reason" maxlength="1000" placeholder="Ex: Legea 3, Art. 300, Art. 310"></textarea>
+                                <label>Sancțiune (închisoare)</label><input id="report-sanction-jail" maxlength="50" placeholder="Ex: 40 luni">
                             </div>
                         </div>
 
@@ -21903,14 +21916,48 @@ const query =
         );
 
 
-    document
-        .getElementById(
-            "report-type"
-        )
-        ?.addEventListener(
-            "change",
-            updateReportOrganizerVisibility
-        );
+    function updateReportSpecialFields() {
+        const type = document.getElementById("report-type")?.value || "";
+        const specialTypes = ["BULETINE VAMA", "OMOLOGARI", "SANCTIUNI"];
+        const shell = document.getElementById("report-special-fields");
+        const title = document.getElementById("report-title");
+        const titleCard = document.getElementById("report-title-card");
+        const isSpecial = specialTypes.includes(type);
+
+        if (shell) shell.style.display = isSpecial ? "grid" : "none";
+        if (titleCard) titleCard.style.display = isSpecial ? "none" : "grid";
+
+        document.querySelectorAll("[data-special-type]").forEach(group => {
+            const active = group.dataset.specialType === type;
+            group.style.display = active ? "grid" : "none";
+            group.querySelectorAll("input, textarea").forEach(field => {
+                field.disabled = !active;
+                field.required = active;
+            });
+        });
+
+        if (title) {
+            if (isSpecial) {
+                const labels = {
+                    "BULETINE VAMA": "Buletin vamal",
+                    "OMOLOGARI": "Fișă omologare",
+                    "SANCTIUNI": "Proces-verbal sancțiune"
+                };
+                title.value = labels[type];
+                title.dataset.specialTitle = "1";
+            } else if (title.dataset.specialTitle === "1") {
+                title.value = "";
+                delete title.dataset.specialTitle;
+            }
+        }
+    }
+
+    document.getElementById("report-type")?.addEventListener("change", () => {
+        updateReportOrganizerVisibility();
+        updateReportSpecialFields();
+    });
+
+    updateReportSpecialFields();
 
 
     /* =========================================================
@@ -21963,7 +22010,9 @@ const query =
                 if (
                     (
                         selectedReportType === "DOVADA RAZIE" ||
-                        selectedReportType === "DOVADA ANTRENAMENT"
+                        selectedReportType === "DOVADA ANTRENAMENT" ||
+                        selectedReportType === "BULETINE VAMA" ||
+                        selectedReportType === "SANCTIUNI"
                     ) &&
                     files.length < 1
                 ) {
@@ -21971,7 +22020,7 @@ const query =
                         "form-message error";
 
                     message.textContent =
-                        "Pentru dovada de participare trebuie să încarci cel puțin o poză.";
+                        "Pentru acest tip de raport trebuie să încarci cel puțin o poză.";
 
                     return;
                 }
@@ -22035,6 +22084,34 @@ const query =
                     type: document.getElementById("report-type").value,
                     title: document.getElementById("report-title").value.trim()
                 };
+
+                const fieldValue = id =>
+                    document.getElementById(id)?.value?.trim() || "";
+
+                if (selectedReportType === "BULETINE VAMA") {
+                    reportPayload.details = {
+                        holderName: fieldValue("report-customs-name"),
+                        cnp: fieldValue("report-customs-cnp"),
+                        document: fieldValue("report-customs-document")
+                    };
+                } else if (selectedReportType === "OMOLOGARI") {
+                    reportPayload.details = {
+                        ownerName: fieldValue("report-homologation-name"),
+                        homologationAgent: fieldValue("report-homologation-agent"),
+                        cnp: fieldValue("report-homologation-cnp"),
+                        modifications: fieldValue("report-homologation-modifications"),
+                        costPerModification: "500.000 $"
+                    };
+                } else if (selectedReportType === "SANCTIUNI") {
+                    reportPayload.details = {
+                        agentName: fieldValue("report-sanction-agent"),
+                        suspectName: fieldValue("report-sanction-suspect"),
+                        fineReason: fieldValue("report-sanction-fine-reason"),
+                        fineAmount: fieldValue("report-sanction-fine"),
+                        jailReason: fieldValue("report-sanction-jail-reason"),
+                        jailDuration: fieldValue("report-sanction-jail")
+                    };
+                }
 
                 if (
                     reportNeedsOrganizer() &&
@@ -22160,6 +22237,7 @@ const query =
                     refreshReportFileSummary();
                     resetReportOrganizerSelection();
                     updateReportOrganizerVisibility();
+                    updateReportSpecialFields();
 
 
                     // Actualizează arhiva în fundal, dar rămâne pe „Raport nou”.
@@ -32694,6 +32772,8 @@ const query =
 .v5-system-pill{border-color:rgba(54,211,151,.28)!important;background:rgba(30,166,109,.09)!important}.hero-rank{color:#75c2ff!important;border-color:rgba(64,159,255,.32)!important;background:rgba(28,125,231,.1)!important}
 .v5-stat-card.gold:before,.v5-quote-panel:before{background:#198fff!important}.primary-btn,.gold-btn,.v5-add-event{background:linear-gradient(135deg,#188eff,#0757bb)!important;border-color:rgba(100,184,255,.38)!important;color:#fff!important;box-shadow:0 10px 28px rgba(0,91,204,.2)!important}
 #profile .profile-avatar,#profile .profile-v4-avatar-ring .profile-avatar{display:block!important;object-fit:cover!important;background:#07192d!important}
+.report-special-fields{gap:16px;padding:20px;border:1px solid rgba(48,157,255,.24);border-radius:18px;background:linear-gradient(145deg,rgba(10,29,49,.92),rgba(5,17,31,.96));box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
+.report-special-group{grid-template-columns:1fr 1fr;gap:10px 14px}.report-special-group h3{grid-column:1/-1;margin:0 0 8px;color:#72c3ff;font-size:15px;letter-spacing:.08em}.report-special-group label{align-self:end;color:#9fb2c7;font-size:10px;font-weight:850;letter-spacing:.06em}.report-special-group input,.report-special-group textarea{width:100%;border:1px solid rgba(107,164,218,.22);border-radius:11px;background:#071522;color:#eef6ff;padding:12px 13px;font:inherit;outline:none}.report-special-group textarea{min-height:92px;resize:vertical}.report-special-group input:focus,.report-special-group textarea:focus{border-color:#319eff;box-shadow:0 0 0 3px rgba(49,158,255,.09)}.report-price-note{grid-column:1/-1;padding:13px 15px;border:1px solid rgba(242,193,65,.24);border-radius:12px;background:rgba(242,193,65,.07);color:#cbd7e3;font-size:11px}.report-price-note strong{color:#ffd25d;font-size:14px}@media(max-width:760px){.report-special-group{grid-template-columns:1fr}}
 </style>
 <script id="police-clean-language-final">
 document.addEventListener('DOMContentLoaded',()=>{
@@ -32707,7 +32787,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   .replace(/Ședință DIICOT/gi,'Ședință Poliție')
   .replace(/DIICOT • CENTRU DE COMANDĂ/g,'POLIȚIA • CENTRU DE COMANDĂ')
   .replace(/DIICOT/g,'POLIȚIA ROMÂNĂ');
- const visit=n=>{if(n.nodeType===3){const p=n.parentElement;if(p&&!['SCRIPT','STYLE'].includes(p.tagName)&&/DIICOT/i.test(n.nodeValue))n.nodeValue=clean(n.nodeValue);return}if(n.nodeType!==1||['SCRIPT','STYLE'].includes(n.tagName))return;['placeholder','title','aria-label','alt'].forEach(a=>{const v=n.getAttribute(a);if(v&&/DIICOT/i.test(v))n.setAttribute(a,clean(v))});n.childNodes.forEach(visit)};
+ const visit=n=>{if(n.nodeType===3){const p=n.parentElement;if(p?.closest('[data-preserve-diicot]'))return;if(p&&!['SCRIPT','STYLE'].includes(p.tagName)&&/DIICOT/i.test(n.nodeValue))n.nodeValue=clean(n.nodeValue);return}if(n.nodeType!==1||['SCRIPT','STYLE'].includes(n.tagName)||n.matches?.('[data-preserve-diicot]'))return;['placeholder','title','aria-label','alt'].forEach(a=>{const v=n.getAttribute(a);if(v&&/DIICOT/i.test(v))n.setAttribute(a,clean(v))});n.childNodes.forEach(visit)};
  visit(document.body);
  new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(visit))).observe(document.body,{childList:true,subtree:true});
  const fallback='https://cdn.discordapp.com/embed/avatars/0.png';
