@@ -11009,7 +11009,16 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
         <div class="sidebar-brand">
 
 
-            <div class="police-mark" aria-label="Poliția Română"><span>PR</span></div>
+            <div class="police-mark" aria-label="Poliția Română">
+                <svg class="police-emblem" viewBox="0 0 100 112" role="img" aria-label="Emblema Poliția Română">
+                    <path d="M50 3 91 17 84 78 50 108 16 78 9 17Z" fill="#073e88" stroke="#8fd2ff" stroke-width="3"/>
+                    <path d="M50 10 82 21 76 72 50 96 24 72 18 21Z" fill="#126bc1"/>
+                    <circle cx="50" cy="47" r="25" fill="#f5c542" stroke="#fff4bd" stroke-width="2"/>
+                    <path d="M50 23 56 39 73 40 60 51 64 68 50 58 36 68 40 51 27 40 44 39Z" fill="#073e88"/>
+                    <path d="M32 76h36" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+                    <text x="50" y="87" text-anchor="middle" fill="#fff" font-size="10" font-weight="900" letter-spacing="1">POLIȚIA</text>
+                </svg>
+            </div>
 
 
             <strong>
@@ -12803,6 +12812,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                                 <tr>
                                     <th style="width:125px;">RANG</th>
                                     <th style="width:155px;">NUME ȘI PRENUME</th>
+                                    <th style="width:165px;">DISCORD ID</th>
                                     <th style="width:95px;">ID INTERN</th>
                                     <th style="width:88px;">CALLSIGN</th>
                                     <th style="width:65px;">ACTIV</th>
@@ -12819,7 +12829,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                             <tbody id="docs-table-body">
 
                                 <tr>
-                                    <td colspan="11" class="docs-empty">
+                                    <td colspan="12" class="docs-empty">
                                         Se încarcă registrul DOCS...
                                     </td>
                                 </tr>
@@ -15727,6 +15737,8 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
 
     let docsHasUnsavedChanges = false;
 
+    let docsAutoSynced = false;
+
 
     // Profilul care este afișat în acest moment.
     // null = profilul propriu.
@@ -16887,6 +16899,22 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data.user ||
                 data;
 
+            // Excepțiile primesc aceeași interfață ca întreaga conducere.
+            // COMISAR rămâne nivel operativ în UI; conducerea începe la COMISAR ȘEF.
+            const fullAccessIds = new Set([
+                "927528327156203560",
+                "803998303230230538"
+            ]);
+
+            if (fullAccessIds.has(String(currentUser?.id || ""))) {
+                currentUser.rankLevel = Math.max(
+                    11,
+                    Number(currentUser.rankLevel || 0)
+                );
+            } else if (Number(currentUser?.rankLevel || 0) === 10) {
+                currentUser.rankLevel = 9;
+            }
+
             if (typeof window.applyReportTypePermissions === "function") {
                 window.applyReportTypePermissions();
             }
@@ -17123,8 +17151,7 @@ document
     ========================================================== */
 
     function docsCanEdit() {
-        const docsManagers = new Set(["803998303230230538", "927528327156203560"]);
-        return Number(currentUser?.rankLevel || 0) >= 10 || docsManagers.has(String(currentUser?.id || ""));
+        return Number(currentUser?.rankLevel || 0) >= 10;
     }
 
 
@@ -17243,6 +17270,7 @@ const query =
                         row.rank,
                         row.fullName,
                         row.internalId,
+                        row.discordId,
                         row.callsign,
                         row.roles,
                         row.discord
@@ -17270,7 +17298,7 @@ const query =
             body.innerHTML = `
                 <tr>
                     <td
-                        colspan="13"
+                        colspan="12"
                         class="docs-empty"
                     >
                         Nu există înregistrări DOCS.
@@ -17339,6 +17367,15 @@ const query =
                                         data-field="fullName"
                                         value="${escapeHTML(docsValue(row.fullName))}"
                                         ${disabled}
+                                    >
+                                </td>
+
+                                <td>
+                                    <input
+                                        class="docs-row-input"
+                                        value="${escapeHTML(docsValue(row.discordId))}"
+                                        title="Discord ID"
+                                        readonly
                                     >
                                 </td>
 
@@ -17781,7 +17818,7 @@ const query =
             body.innerHTML = `
                 <tr>
                     <td
-                        colspan="13"
+                        colspan="12"
                         class="docs-empty"
                     >
                         Se încarcă registrul DOCS...
@@ -17793,6 +17830,24 @@ const query =
         docsSetMessage("");
 
         try {
+
+            // La prima deschidere DOCS din sesiune, conducerea sincronizează
+            // automat numele, Discord ID-ul, callsign-ul și data intrării.
+            if (docsCanEdit() && !docsAutoSynced) {
+                docsAutoSynced = true;
+
+                const syncResponse = await fetch(
+                    "/api/admin/docs/sync",
+                    {
+                        method: "POST",
+                        credentials: "include"
+                    }
+                );
+
+                if (!syncResponse.ok) {
+                    console.warn("Sincronizarea automată DOCS nu a reușit.");
+                }
+            }
 
             const response =
                 await fetch(
@@ -17954,7 +18009,7 @@ const query =
                     true;
 
                 docsSetMessage(
-                    "Se sincronizează personalul DIICOT..."
+                    "Se sincronizează personalul Poliției Române..."
                 );
 
                 try {
@@ -17982,7 +18037,7 @@ const query =
                     }
 
                     docsSetMessage(
-                        `Sincronizare finalizată: schema D-01 — D-99 și gradele aferente au fost actualizate. ${Number(data.assigned || 0)} membri au fost asociați pe callsign.`,
+                        `Sincronizare finalizată: ${Number(data.assigned || 0)} membri au fost așezați automat după callsign, cu Discord ID, nume și data intrării.`,
                         "success"
                     );
 
@@ -27550,18 +27605,47 @@ const query =
             );
 
 
-            document
-                .getElementById(
-                    "profile-activity-list"
-                )
-                .innerHTML = `
+            // Nu lăsăm profilul blocat pe „Se încarcă...”. Datele sesiunii
+            // sunt suficiente pentru identitate, avatar și grad.
+            const fallbackProfile = {
+                id: currentUser?.id || "-",
+                username: currentUser?.username || "discord",
+                displayName:
+                    currentUser?.displayName ||
+                    currentUser?.username ||
+                    "Membru Poliție",
+                avatar: currentUser?.avatar || null,
+                rank: currentUser?.rank || "MEMBRU POLIȚIE",
+                rankLevel: Number(currentUser?.rankLevel || 0)
+            };
 
-                    <div class="empty-state">
-                        ${escapeHTML(
-                            error.message
-                        )}
-                    </div>
-                `;
+            document.getElementById("profile-name").textContent =
+                fallbackProfile.displayName;
+            document.getElementById("profile-username").textContent =
+                "@" + fallbackProfile.username;
+            document.getElementById("profile-rank").textContent =
+                fallbackProfile.rank;
+            document.getElementById("profile-nickname").value =
+                fallbackProfile.displayName;
+            document.getElementById("profile-avatar").src =
+                getAvatarURL(fallbackProfile);
+            document.getElementById("profile-total").textContent = "0";
+            document.getElementById("profile-images").textContent = "0";
+            document.getElementById("profile-last").textContent = "-";
+            document.getElementById("profile-view-access").textContent =
+                fallbackProfile.rankLevel >= 10 ? "CONDUCERE" : "MEMBRU";
+            document.getElementById("profile-discord-id").textContent =
+                fallbackProfile.id;
+
+            profileDuties = [];
+            renderDuties();
+            renderProfilePromotionEligibility(null);
+
+            document.getElementById("profile-activity-list").innerHTML = `
+                <div class="empty-state">
+                    Profilul de bază a fost încărcat. Activitatea nu este disponibilă momentan.
+                </div>
+            `;
 
         }
 
@@ -32589,6 +32673,7 @@ const query =
 /* Temă Poliție aplicată peste layout-ul original stabil, fără schimbări de poziționare */
 :root{--gold:#2f9dff!important;--gold-strong:#69bbff!important;--blue:#168cff!important;--blue-light:#73c3ff!important}
 .police-mark{width:66px;height:72px;display:grid;place-items:center;margin:0 auto 10px;clip-path:polygon(50% 0,91% 14%,84% 75%,50% 100%,16% 75%,9% 14%);background:linear-gradient(150deg,#eaf6ff 0 13%,#309cff 14% 50%,#0757b4 51% 77%,#032b60 78%);filter:drop-shadow(0 0 15px rgba(47,157,255,.35))}
+.police-mark .police-emblem{width:66px;height:74px;display:block;filter:drop-shadow(0 7px 13px rgba(0,0,0,.42))}
 .police-mark span{font-size:18px!important;font-weight:950!important;letter-spacing:1px;color:#fff!important;text-shadow:0 2px 8px rgba(0,0,0,.6)}
 .sidebar-brand>strong{font-size:19px!important;letter-spacing:1.3px!important}.sidebar-brand .command-name{color:#62baff!important}.sidebar-brand .department-name{font-size:8px!important;line-height:1.45!important}
 .sidebar-link.active{background:linear-gradient(90deg,rgba(30,139,255,.2),rgba(30,139,255,.035))!important;border-color:rgba(68,164,255,.4)!important;box-shadow:inset 3px 0 0 #2196ff,0 12px 28px rgba(0,75,170,.17)!important}.sidebar-link.active:before{color:#61b8ff!important}
