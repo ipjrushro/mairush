@@ -11,6 +11,7 @@ const {
     PutObjectCommand,
     PutBucketCorsCommand,
     GetObjectCommand,
+    HeadObjectCommand,
     ListObjectsV2Command,
     ListObjectVersionsCommand,
     DeleteObjectsCommand
@@ -628,80 +629,156 @@ async function getGuildMembersCached(
 
 const PROMOTION_REQUIREMENTS = {
     1: {
-        nextRank: "AGENT OPERATIV DIICOT",
-        reports: 50,
+        nextRank: "AGENT",
+        reports: 15,
         raids: 0,
         trainings: 0,
-        minDays: 7,
+        minDays: 3,
+        dutyHours: 15,
         manual: [
-            "Evaluare comportamentală",
-            "Analiză capabilitate"
+            "Omologări",
+            "Prezență la razii",
+            "Cunoașterea elementară a regulamentului"
         ]
     },
 
     2: {
-        nextRank: "AGENT PRINCIPAL DIICOT",
-        reports: 70,
+        nextRank: "AGENT PRINCIPAL",
+        reports: 25,
         raids: 0,
         trainings: 0,
         minDays: 7,
-        manual: [
-            "Seriozitate și capabilitate"
-        ]
+        dutyHours: 15,
+        manual: []
     },
 
     3: {
-        nextRank: "SUB INSPECTOR DIICOT",
-        reports: 100,
+        nextRank: "AGENT ȘEF ADJUNCT",
+        reports: 30,
         raids: 0,
         trainings: 0,
-        minDays: 14,
+        minDays: 7,
+        dutyHours: 15,
         manual: [
-            "Seriozitate și capabilitate",
-            "Evaluare comportamentală",
-            "Testarea capacităților de coordonare"
+            "Activitate constantă",
+            "Anunțuri la CNN"
         ]
     },
 
     4: {
-        nextRank: "INSPECTOR DIICOT",
-        reports: 50,
-        raids: 5,
-        trainings: 2,
-        minDays: 14,
+        nextRank: "AGENT ȘEF PRINCIPAL",
+        reports: 40,
+        raids: 0,
+        trainings: 0,
+        minDays: 10,
+        dutyHours: 15,
         manual: [
-            "Seriozitate și capabilitate",
-            "Evaluare comportamentală",
-            "Recomandare de la superiori"
+            "Activitate excelentă, fără abateri"
         ]
     },
 
     5: {
-        nextRank: "INSPECTOR PRINCIPAL DIICOT",
-        reports: 60,
-        raids: 7,
-        trainings: 3,
+        nextRank: "SUB INSPECTOR",
+        reports: 45,
+        raids: 0,
+        trainings: 0,
         minDays: 14,
+        dutyHours: 15,
         manual: [
-            "Prezențe neanunțate",
-            "Recomandare de la superiori",
-            "Implicare activă în structura DIICOT"
+            "Pregătirea cadeților"
         ]
     },
 
     6: {
-        nextRank: "SUB COMISAR DIICOT",
-        reports: 50,
-        raids: 8,
-        trainings: 2,
-        minDays: 14,
+        nextRank: "INSPECTOR",
+        reports: 60,
+        raids: 0,
+        trainings: 0,
+        minDays: 20,
+        dutyHours: 15,
         manual: [
-            "Ajutarea gradelor mai mici",
-            "Implicare activă în structura DIICOT",
-            "Recomandare de la CONDUCERE"
+            "Implicare în coordonare"
         ]
     }
 };
+
+
+// ======================================================
+// PONTAJ POLITIE — BACKBLAZE B2
+// Botul scrie câte un JSON per utilizator în pontaj/users/<discordId>.json.
+// Site-ul citește sesiunile și numără doar timpul suprapus perioadei
+// gradului curent, astfel orele vechi nu se refolosesc la următorul UP.
+// ======================================================
+const DUTY_B2_PREFIX = "pontaj/users/";
+
+async function b2BodyToString(body) {
+    if (!body) return "";
+    if (typeof body.transformToString === "function") {
+        return await body.transformToString();
+    }
+    const chunks = [];
+    for await (const chunk of body) chunks.push(Buffer.from(chunk));
+    return Buffer.concat(chunks).toString("utf8");
+}
+
+function dutyB2Key(userId) {
+    return `${DUTY_B2_PREFIX}${String(userId).replace(/\D/g, "")}.json`;
+}
+
+async function readDutyRecord(userId) {
+    try {
+        const result = await b2.send(new GetObjectCommand({
+            Bucket: B2_BUCKET,
+            Key: dutyB2Key(userId)
+        }));
+        const raw = await b2BodyToString(result.Body);
+        const parsed = JSON.parse(raw || "{}");
+        return {
+            userId: String(userId),
+            active: Boolean(parsed.active),
+            activeSince: Number(parsed.activeSince || 0) || null,
+            sessions: Array.isArray(parsed.sessions) ? parsed.sessions : []
+        };
+    } catch (error) {
+        const status = Number(error?.$metadata?.httpStatusCode || error?.statusCode || 0);
+        const name = String(error?.name || "");
+        if (status === 404 || name === "NoSuchKey" || name === "NotFound") {
+            return { userId: String(userId), active: false, activeSince: null, sessions: [] };
+        }
+        console.error("Duty B2 Read Error:", error?.message || error);
+        return { userId: String(userId), active: false, activeSince: null, sessions: [] };
+    }
+}
+
+function calculateDutyMsSince(record, sinceMs) {
+    const since = Number(sinceMs || 0);
+    const now = Date.now();
+    let total = 0;
+
+    for (const session of (record?.sessions || [])) {
+        const start = Number(session.start || session.startTime || 0);
+        const end = Number(session.end || session.endTime || 0);
+        if (!start || !end || end <= start) continue;
+
+        const effectiveStart = Math.max(start, since);
+        const effectiveEnd = Math.min(end, now);
+        if (effectiveEnd > effectiveStart) total += effectiveEnd - effectiveStart;
+    }
+
+    if (record?.active && Number(record.activeSince || 0)) {
+        const effectiveStart = Math.max(Number(record.activeSince), since);
+        if (now > effectiveStart) total += now - effectiveStart;
+    }
+
+    return total;
+}
+
+function formatDutyDuration(ms) {
+    const safe = Math.max(0, Number(ms || 0));
+    const hours = Math.floor(safe / 3600000);
+    const minutes = Math.floor((safe % 3600000) / 60000);
+    return `${hours}h ${minutes}m`;
+}
 
 
 async function ensureRankProgressRow(
@@ -950,7 +1027,11 @@ async function buildPromotionEligibility(
             progress: {
                 reports: 0,
                 raids: 0,
-                trainings: 0
+                trainings: 0,
+                dutyMs: 0,
+                dutyHours: 0,
+                dutyFormatted: "0h 0m",
+                dutyActive: false
             },
 
             numericEligible:
@@ -1040,13 +1121,21 @@ async function buildPromotionEligibility(
         }
     }
 
+    const dutyRecord = await readDutyRecord(userId);
+    const dutyMs = calculateDutyMsSince(dutyRecord, validSince);
+    const dutyHours = dutyMs / 3600000;
+
     const progress = {
         reports:
             reportsSinceRank.length,
 
         raids,
 
-        trainings
+        trainings,
+        dutyMs,
+        dutyHours,
+        dutyFormatted: formatDutyDuration(dutyMs),
+        dutyActive: Boolean(dutyRecord?.active)
     };
 
     const numericEligible =
@@ -1056,6 +1145,8 @@ async function buildPromotionEligibility(
             Number(requirement.raids || 0) &&
         trainings >=
             Number(requirement.trainings || 0) &&
+        dutyHours >=
+            Number(requirement.dutyHours || 0) &&
         daysInRank >=
             Number(requirement.minDays || 0);
 
@@ -1100,6 +1191,12 @@ async function buildPromotionEligibility(
             minDays:
                 Number(
                     requirement.minDays ||
+                    0
+                ),
+
+            dutyHours:
+                Number(
+                    requirement.dutyHours ||
                     0
                 )
         },
