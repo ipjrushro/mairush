@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Centrul Operațional | Poliția Română</title>
+    <title>Centru de Comandă | Poliția Română</title>
 
     <style>
 
@@ -11009,15 +11009,11 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
         <div class="sidebar-brand">
 
 
-            <img
-                src="/uploads/politie-logo.png"
-                alt="Poliția Română"
-                class="diicot-logo"
-            >
+            <div class="police-mark" aria-label="Poliția Română"><span>PR</span></div>
 
 
             <strong>
-                POLIȚIA
+                POLIȚIA ROMÂNĂ
             </strong>
 
 
@@ -11338,7 +11334,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
     background-image:
         linear-gradient(90deg, rgba(2,9,16,.97) 0%, rgba(2,9,16,.88) 23%, rgba(2,9,16,.52) 43%, rgba(2,9,16,.22) 58%, rgba(2,9,16,.58) 78%, rgba(2,9,16,.94) 100%),
         linear-gradient(180deg, rgba(3,10,17,.12) 0%, rgba(3,10,17,.04) 55%, rgba(3,10,17,.38) 100%),
-        linear-gradient(135deg, #06192d 0%, #0b3158 48%, #061426 100%);
+        url('/uploads/diicot-hero-bg.png?v=11');
     background-size: 100% 100%, 100% 100%, cover;
     background-position: center, center, 50% 49%;
     background-repeat: no-repeat;
@@ -32589,166 +32585,35 @@ const query =
         }
 
 </style>
-<!-- POLICE BLUE-LINE COMMAND — V2 / layout clasic, design nou -->
-<style id="police-blue-line-v2">
-:root{
-  --pb-bg:#030812;--pb-side:#061323;--pb-panel:#091c32;--pb-panel2:#0d2847;
-  --pb-blue:#1387ff;--pb-cyan:#4fc3ff;--pb-red:#f33e56;--pb-white:#f5f9ff;
-  --pb-muted:#9eb4ce;--pb-line:rgba(91,164,246,.2);--pb-shadow:0 24px 70px rgba(0,5,16,.46);
-}
-html,body{background:#030812!important}
-body{font-size:16px!important;color:var(--pb-white)!important;background:
- radial-gradient(circle at 88% 3%,rgba(19,135,255,.17),transparent 29%),
- radial-gradient(circle at 32% 100%,rgba(26,100,190,.1),transparent 35%),
- linear-gradient(145deg,#020711,#07172a 52%,#030812)!important}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.32;background-image:linear-gradient(rgba(58,142,232,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(58,142,232,.045) 1px,transparent 1px);background-size:38px 38px;mask-image:linear-gradient(to right,transparent 250px,#000)}
-
-/* Pozitionarea veche: bara verticala in stanga */
-.command-sidebar{position:fixed!important;inset:0 auto 0 0!important;width:292px!important;height:100vh!important;padding:0 15px 18px!important;display:flex!important;flex-direction:column!important;background:linear-gradient(180deg,rgba(4,15,29,.99),rgba(5,22,40,.99) 54%,rgba(3,12,24,.99))!important;border-right:1px solid rgba(69,151,245,.25)!important;box-shadow:20px 0 55px rgba(0,5,15,.42)!important;overflow:hidden!important;z-index:1000!important}
-.command-sidebar:before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#137fff 0 44%,#f8fbff 44% 56%,#ed334f 56%);box-shadow:0 0 22px rgba(39,139,255,.7)}
-.command-sidebar:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 5%,rgba(29,132,255,.17),transparent 26%),linear-gradient(120deg,transparent 46%,rgba(255,255,255,.018) 47%,transparent 48%)}
-.sidebar-brand{position:relative!important;z-index:1!important;display:grid!important;grid-template-columns:62px 1fr!important;grid-template-rows:auto auto auto!important;align-items:center!important;gap:0 12px!important;margin:0 -15px 13px!important;padding:25px 18px 18px!important;min-height:137px!important;text-align:left!important;background:linear-gradient(135deg,rgba(12,48,84,.88),rgba(4,19,36,.72))!important;border-bottom:1px solid rgba(77,158,245,.18)!important}
-.sidebar-brand .diicot-logo{grid-row:1/4!important;width:60px!important;height:60px!important;filter:drop-shadow(0 0 17px rgba(60,157,255,.55))!important}
-.sidebar-brand>strong{font-size:24px!important;line-height:1!important;letter-spacing:2.4px!important;color:#fff!important;text-shadow:0 0 22px rgba(55,156,255,.35)!important}
-.sidebar-brand .command-name{font-size:11px!important;color:#57b6ff!important;letter-spacing:1.7px!important;font-weight:900!important;margin-top:5px!important}
-.sidebar-brand .department-name{display:none!important}.sidebar-brand .v5-brand-quote{font-size:10px!important;color:#8fa8c2!important;margin-top:5px!important;white-space:nowrap!important}
-.sidebar-brand:after{content:"● UNITATE ACTIVĂ";position:absolute;right:17px;bottom:10px;color:#5ee6a4;font-size:8px;font-weight:900;letter-spacing:1px;text-shadow:0 0 11px rgba(65,226,153,.55)}
-.command-sidebar>.sidebar-group-title,.sidebar-bottom>.sidebar-group-title{position:relative;z-index:1;font-size:10px!important;letter-spacing:1.7px!important;color:#6684a3!important;margin:9px 11px 7px!important}
-.sidebar-nav{position:relative!important;z-index:1!important;display:flex!important;flex-direction:column!important;gap:5px!important;overflow-y:auto!important;padding:2px 2px 10px!important;scrollbar-width:thin!important;scrollbar-color:rgba(45,134,231,.42) transparent!important}
-.sidebar-link{position:relative!important;display:flex!important;align-items:center!important;min-height:48px!important;width:100%!important;padding:0 14px 0 48px!important;border:1px solid transparent!important;border-radius:12px!important;background:transparent!important;color:#a6bad0!important;font-size:13px!important;font-weight:800!important;letter-spacing:.25px!important;text-align:left!important;transition:.2s ease!important}
-.sidebar-link:before{left:16px!important;width:18px!important;font-size:16px!important;color:#649fd9!important}
-.sidebar-link:hover{transform:translateX(3px)!important;color:#fff!important;background:rgba(27,123,235,.09)!important;border-color:rgba(68,155,248,.2)!important}
-.sidebar-link.active{transform:none!important;color:#fff!important;background:linear-gradient(90deg,rgba(20,132,255,.27),rgba(18,78,143,.09))!important;border-color:rgba(64,159,255,.46)!important;box-shadow:inset 3px 0 0 #2999ff,0 11px 28px rgba(0,67,153,.18),0 0 25px rgba(22,132,255,.07)!important}
-.sidebar-link.active:before{color:#fff!important;text-shadow:0 0 13px #2b9bff!important}
-.sidebar-admin-separator{height:1px!important;margin:9px 10px!important;background:linear-gradient(90deg,transparent,rgba(78,156,242,.3),transparent)!important}
-.sidebar-bottom{position:relative!important;z-index:1!important;margin-top:auto!important;padding-top:9px!important;border-top:1px solid rgba(85,150,221,.13)!important}
-.sidebar-bottom .sidebar-link{min-height:41px!important;font-size:11px!important}.sidebar-security{border:1px solid rgba(51,206,142,.18)!important;border-radius:12px!important;background:rgba(31,160,107,.055)!important;padding:10px!important}.sidebar-security strong{font-size:10px!important}.sidebar-security span{font-size:9px!important}
-
-/* Zona principala si topbar */
-.command-main{margin-left:292px!important;width:calc(100% - 292px)!important;min-height:100vh!important}
-.command-topbar{position:sticky!important;top:0!important;z-index:900!important;min-height:78px!important;margin:0!important;padding:13px 28px!important;border:0!important;border-bottom:1px solid var(--pb-line)!important;border-radius:0!important;background:rgba(4,15,29,.82)!important;backdrop-filter:blur(22px)!important;box-shadow:0 16px 35px rgba(0,5,16,.25)!important}
-.command-topbar:after{content:"DISPECERAT DIGITAL • CANAL SECURIZAT";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:10px;font-weight:900;letter-spacing:1.8px;color:#5880a8}
-.v5-grid-btn,.v8-notification-btn{width:48px!important;height:48px!important;border-radius:13px!important;font-size:19px!important;border:1px solid rgba(83,162,249,.2)!important;background:rgba(11,43,76,.65)!important}
-.v5-search-wrap{height:48px!important;min-width:360px!important;border:1px solid rgba(91,166,248,.21)!important;border-radius:13px!important;background:rgba(2,12,24,.72)!important}.v5-search-wrap input{font-size:14px!important}.v5-search-wrap>span{font-size:21px!important;color:#4eb1ff!important}
-.v5-user-menu{min-height:50px!important;border:1px solid rgba(92,165,242,.18)!important;border-radius:13px!important;background:rgba(9,34,61,.6)!important}.user-avatar{width:40px!important;height:40px!important}.user-info strong{font-size:14px!important}.user-info span{font-size:11px!important}
-.dashboard-content{max-width:1760px!important;margin:0 auto!important;padding:27px 31px 55px!important}
-
-/* Hero extravagant, realist, fara a muta structura */
-.v5-overview-hero{position:relative!important;min-height:390px!important;border-radius:26px!important;border:1px solid rgba(77,159,250,.3)!important;overflow:hidden!important;box-shadow:0 30px 80px rgba(0,5,17,.55),inset 0 0 0 1px rgba(255,255,255,.025)!important}
-.v5-overview-hero:before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(3,13,26,.96) 0%,rgba(3,16,31,.75) 40%,rgba(3,15,29,.18) 67%,rgba(3,13,25,.66) 100%),linear-gradient(180deg,transparent 60%,rgba(3,10,20,.72))!important}
-.v5-overview-hero:after{content:"POLIȚIA • CENTRU OPERAȚIONAL";position:absolute;right:28px;bottom:22px;z-index:3;font-size:10px;font-weight:900;letter-spacing:2.5px;color:rgba(210,231,255,.55);padding:10px 14px;border-left:3px solid #1689ff;background:rgba(4,18,34,.5);backdrop-filter:blur(8px)}
-.v5-hero-copy,.v5-hero-side{z-index:2!important}.v5-hero-copy{padding-left:44px!important;max-width:720px!important}.v5-system-pill{font-size:11px!important;min-height:32px!important;padding:0 13px!important;border-color:rgba(72,209,151,.35)!important;background:rgba(31,184,119,.11)!important}.v5-welcome-kicker{font-size:12px!important;letter-spacing:2.4px!important;color:#61baff!important}.v5-hero-copy h1{font-size:clamp(43px,5vw,72px)!important;line-height:.98!important;letter-spacing:-3px!important;margin:13px 0 18px!important;text-shadow:0 18px 42px rgba(0,0,0,.5)!important}.v5-hero-copy p{max-width:590px!important;font-size:16px!important;line-height:1.75!important;color:#c2d3e5!important}.hero-rank{font-size:12px!important;padding:8px 14px!important;background:rgba(17,122,240,.16)!important;border-color:rgba(74,164,255,.38)!important}
-.v5-clock-panel{padding:22px!important;border:1px solid rgba(82,164,255,.26)!important;border-radius:18px!important;background:rgba(2,14,29,.73)!important;box-shadow:0 18px 45px rgba(0,0,0,.33)!important;backdrop-filter:blur(14px)!important}.v5-clock-panel strong{font-size:38px!important;color:#fff!important}.v5-clock-panel span,.v5-clock-panel small{font-size:12px!important;line-height:1.6!important}.v5-hero-statuses span{font-size:11px!important;padding:9px 12px!important;border:1px solid rgba(93,166,243,.15)!important;border-radius:9px!important;background:rgba(3,16,31,.58)!important}
-
-/* Carduri si continut mare peste tot */
-.dashboard-section{animation:pbEnter .3s ease both}@keyframes pbEnter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
-.dashboard-panel,.v5-glass-panel,.home-action-card,.stat-card,.profile-panel,.form-panel,.table-panel{border:1px solid var(--pb-line)!important;border-radius:19px!important;background:linear-gradient(145deg,rgba(10,34,61,.92),rgba(5,19,36,.92))!important;box-shadow:0 20px 50px rgba(0,5,17,.28)!important;backdrop-filter:blur(16px)!important}
-.dashboard-panel:before,.home-action-card:before{border-color:rgba(74,162,255,.2)!important}.dashboard-panel:hover,.home-action-card:hover{border-color:rgba(73,164,255,.42)!important;box-shadow:0 24px 56px rgba(0,12,35,.4),0 0 30px rgba(24,124,235,.06)!important}
-.section-title h2,.dashboard-section>h2{font-size:clamp(29px,3vw,42px)!important;letter-spacing:-1px!important;color:#f7fbff!important}.section-title span,.section-title p{font-size:14px!important;line-height:1.7!important}.section-kicker{font-size:11px!important;letter-spacing:2px!important;color:#58b5ff!important}
-.dashboard-content p,.dashboard-content small,.dashboard-content label,.dashboard-content .muted,.dashboard-content .empty-state,.dashboard-content .form-hint,.dashboard-content .status-text,.dashboard-content li{font-size:14px!important;line-height:1.65!important}.dashboard-content h3{font-size:20px!important}.dashboard-content h4{font-size:17px!important}
-.dashboard-content input,.dashboard-content select,.dashboard-content textarea{min-height:50px!important;padding:12px 15px!important;border:1px solid rgba(97,166,240,.22)!important;border-radius:12px!important;background:rgba(2,13,26,.76)!important;color:#f0f7ff!important;font-size:15px!important}.dashboard-content textarea{min-height:125px!important}.dashboard-content input:focus,.dashboard-content select:focus,.dashboard-content textarea:focus{border-color:#208dff!important;box-shadow:0 0 0 4px rgba(32,141,255,.12)!important}
-.dashboard-content button,.primary-btn,.gold-btn,.secondary-btn{min-height:46px!important;padding:0 18px!important;border-radius:11px!important;font-size:13px!important;font-weight:850!important}.primary-btn,.gold-btn{color:#fff!important;border:1px solid rgba(110,188,255,.4)!important;background:linear-gradient(135deg,#168cff,#0753b8)!important;box-shadow:0 12px 25px rgba(0,91,204,.25)!important}
-.home-action-card{min-height:176px!important;padding:23px!important}.home-action-card h3{font-size:18px!important}.home-action-card p{font-size:14px!important}.v5-stat-card,.stat-card{min-height:132px!important;padding:20px!important;border-radius:18px!important}.v5-stat-card strong,.stat-card strong,.stat-value{font-size:32px!important}
-.dashboard-content table{border-collapse:separate!important;border-spacing:0 7px!important}.dashboard-content th{height:58px!important;padding:14px!important;color:#70baff!important;font-size:12px!important;letter-spacing:.7px!important}.dashboard-content td{height:55px!important;padding:14px!important;font-size:14px!important;background:rgba(3,16,31,.62)!important;border-top:1px solid rgba(95,162,233,.11)!important;border-bottom:1px solid rgba(95,162,233,.11)!important}.dashboard-content tr td:first-child{border-radius:11px 0 0 11px!important}.dashboard-content tr td:last-child{border-radius:0 11px 11px 0!important}
-#docs .docs-table th{font-size:12px!important}#docs .docs-table td{font-size:14px!important}#docs .docs-rank-badge,#docs .docs-role-pill,#docs .docs-mini-btn{font-size:12px!important}.v8-notification-panel,.v8-user-dropdown{border:1px solid rgba(79,157,243,.27)!important;border-radius:17px!important;background:rgba(4,18,35,.98)!important;box-shadow:0 28px 75px rgba(0,0,0,.58)!important}
-
-@media(max-width:980px){.command-sidebar{width:250px!important}.command-main{margin-left:250px!important;width:calc(100% - 250px)!important}.command-topbar:after{display:none!important}.dashboard-content{padding:20px!important}.v5-search-wrap{min-width:220px!important}.sidebar-link{font-size:12px!important}}
-@media(max-width:760px){.command-sidebar{position:relative!important;width:100%!important;height:auto!important;max-height:none!important;padding-bottom:10px!important}.sidebar-nav{max-height:330px!important}.sidebar-bottom{display:none!important}.command-main{margin-left:0!important;width:100%!important}.command-topbar{position:sticky!important;padding:10px 12px!important}.v5-search-wrap{min-width:0!important;width:100%!important}.v5-search-wrap kbd,.user-info{display:none!important}.dashboard-content{padding:12px!important}.v5-overview-hero{min-height:auto!important}.v5-hero-copy{padding:35px 24px 18px!important}.v5-hero-copy h1{font-size:39px!important}.v5-hero-side{position:relative!important;right:auto!important;top:auto!important;padding:0 24px 45px!important;align-items:flex-start!important}.dashboard-content p,.dashboard-content small,.dashboard-content label,.dashboard-content td{font-size:13px!important}}
+<style id="police-clean-theme-final">
+/* Temă Poliție aplicată peste layout-ul original stabil, fără schimbări de poziționare */
+:root{--gold:#2f9dff!important;--gold-strong:#69bbff!important;--blue:#168cff!important;--blue-light:#73c3ff!important}
+.police-mark{width:66px;height:72px;display:grid;place-items:center;margin:0 auto 10px;clip-path:polygon(50% 0,91% 14%,84% 75%,50% 100%,16% 75%,9% 14%);background:linear-gradient(150deg,#eaf6ff 0 13%,#309cff 14% 50%,#0757b4 51% 77%,#032b60 78%);filter:drop-shadow(0 0 15px rgba(47,157,255,.35))}
+.police-mark span{font-size:18px!important;font-weight:950!important;letter-spacing:1px;color:#fff!important;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+.sidebar-brand>strong{font-size:19px!important;letter-spacing:1.3px!important}.sidebar-brand .command-name{color:#62baff!important}.sidebar-brand .department-name{font-size:8px!important;line-height:1.45!important}
+.sidebar-link.active{background:linear-gradient(90deg,rgba(30,139,255,.2),rgba(30,139,255,.035))!important;border-color:rgba(68,164,255,.4)!important;box-shadow:inset 3px 0 0 #2196ff,0 12px 28px rgba(0,75,170,.17)!important}.sidebar-link.active:before{color:#61b8ff!important}
+.v5-system-pill{border-color:rgba(54,211,151,.28)!important;background:rgba(30,166,109,.09)!important}.hero-rank{color:#75c2ff!important;border-color:rgba(64,159,255,.32)!important;background:rgba(28,125,231,.1)!important}
+.v5-stat-card.gold:before,.v5-quote-panel:before{background:#198fff!important}.primary-btn,.gold-btn,.v5-add-event{background:linear-gradient(135deg,#188eff,#0757bb)!important;border-color:rgba(100,184,255,.38)!important;color:#fff!important;box-shadow:0 10px 28px rgba(0,91,204,.2)!important}
+#profile .profile-avatar,#profile .profile-v4-avatar-ring .profile-avatar{display:block!important;object-fit:cover!important;background:#07192d!important}
 </style>
-<style id="police-layout-correction-v3">
-/* V3 — identitate POLITIE si continut echilibrat */
-.command-sidebar{width:248px!important;padding-left:12px!important;padding-right:12px!important}
-.command-main{margin-left:248px!important;width:calc(100% - 248px)!important}
-.dashboard-content{max-width:none!important;width:100%!important;margin:0!important;padding:26px clamp(18px,2.6vw,44px) 56px!important}
-.sidebar-brand{grid-template-columns:54px 1fr!important;margin-left:-12px!important;margin-right:-12px!important;padding-left:15px!important;padding-right:13px!important}
-.sidebar-brand .diicot-logo{display:none!important}
-.sidebar-brand:before{content:"PR"!important;grid-row:1/4!important;display:grid!important;place-items:center!important;width:52px!important;height:61px!important;clip-path:polygon(50% 0,92% 15%,84% 76%,50% 100%,16% 76%,8% 15%)!important;background:linear-gradient(145deg,#eaf6ff,#2e96ff 42%,#0751ad 43%,#032657)!important;color:#fff!important;font-size:17px!important;font-weight:950!important;letter-spacing:1px!important;text-shadow:0 2px 8px rgba(0,0,0,.6)!important;box-shadow:0 0 25px rgba(36,142,255,.35)!important}
-.sidebar-brand>strong{font-size:19px!important;letter-spacing:1.5px!important}.sidebar-brand .command-name{font-size:10px!important}
-.sidebar-brand:after{content:"● DISPECERAT ONLINE"!important}
-.sidebar-link{min-height:45px!important;padding-left:43px!important;font-size:12px!important}.sidebar-link:before{left:13px!important}
-.command-topbar{padding-left:clamp(18px,2.5vw,42px)!important;padding-right:clamp(18px,2.5vw,42px)!important}
-.command-topbar:after{content:"POLIȚIA ROMÂNĂ • CENTRU DE COMANDĂ"!important}
-#diicot-photo-hero{background-image:radial-gradient(circle at 78% 28%,rgba(47,157,255,.26),transparent 24%),linear-gradient(100deg,rgba(2,10,21,.98) 0%,rgba(5,25,46,.93) 48%,rgba(7,43,76,.82) 100%)!important;background-size:cover!important}
-#diicot-photo-hero .v5-hero-atmosphere{opacity:.75!important;background:linear-gradient(115deg,transparent 56%,rgba(36,143,255,.12) 56% 57%,transparent 57% 64%,rgba(238,52,77,.08) 64% 65%,transparent 65%)!important}
-.v5-overview-hero:after{content:"POLIȚIA ROMÂNĂ  •  DISPECERAT DIGITAL"!important}
-.v5-dashboard-grid{grid-template-columns:minmax(0,1.15fr) minmax(340px,.85fr)!important;gap:18px!important}
-.v5-bottom-grid{grid-template-columns:minmax(300px,.8fr) minmax(340px,1.1fr) minmax(300px,.8fr)!important;gap:18px!important}
-.v5-stats-grid{grid-template-columns:repeat(4,minmax(180px,1fr))!important}
-@media(max-width:1200px){.v5-stats-grid{grid-template-columns:repeat(2,minmax(180px,1fr))!important}.v5-bottom-grid{grid-template-columns:1fr 1fr!important}.v5-quick-panel{grid-column:1/-1!important}}
-@media(max-width:980px){.command-sidebar{width:224px!important}.command-main{margin-left:224px!important;width:calc(100% - 224px)!important}.v5-dashboard-grid{grid-template-columns:1fr!important}}
-@media(max-width:760px){.command-sidebar{width:100%!important}.command-main{margin-left:0!important;width:100%!important}.v5-stats-grid,.v5-bottom-grid{grid-template-columns:1fr!important}.v5-quick-panel{grid-column:auto!important}}
-</style>
-<script id="police-visible-language-v3">
-/* Înlocuiește exclusiv textul afișat; nu atinge valorile/API-urile interne. */
+<script id="police-clean-language-final">
 document.addEventListener('DOMContentLoaded',()=>{
-  const swap=s=>String(s||'')
-    .replace(/DIICOT ROMÂNIA/g,'POLIȚIA ROMÂNĂ')
-    .replace(/Conducerea DIICOT/g,'Conducerea Poliției')
-    .replace(/CONDUCERE DIICOT/g,'CONDUCERE POLIȚIE')
-    .replace(/Personal DIICOT/g,'Personal Poliție')
-    .replace(/PERSONAL DIICOT/g,'PERSONAL POLIȚIE')
-    .replace(/Membru DIICOT/g,'Membru Poliție')
-    .replace(/membrilor DIICOT/g,'membrilor Poliției')
-    .replace(/membrii DIICOT/g,'membrii Poliției')
-    .replace(/structura DIICOT/g,'structura Poliției')
-    .replace(/STRUCTURĂ DIICOT/g,'STRUCTURĂ POLIȚIE')
-    .replace(/IDENTITATE DIICOT/g,'IDENTITATE POLIȚIE')
-    .replace(/Ședință DIICOT/g,'Ședință Poliție')
-    .replace(/GRAD DIICOT/g,'GRAD POLIȚIE')
-    .replace(/RECRUTARE DIICOT/g,'RECRUTARE POLIȚIE')
-    .replace(/PROGRES PROFESIONAL • DIICOT/g,'PROGRES PROFESIONAL • POLIȚIE')
-    .replace(/ACTIVITĂȚI • DIICOT/g,'ACTIVITĂȚI • POLIȚIE')
-    .replace(/DEPARTAMENT: DIICOT/g,'DEPARTAMENT: POLIȚIE')
-    .replace(/DIICOT • CENTRU DE COMANDĂ/g,'POLIȚIA • CENTRU DE COMANDĂ')
-    .replace(/DIICOT/g,'POLIȚIA ROMÂNĂ');
-  const processNode=node=>{
-    if(node.nodeType===3){const p=node.parentElement;if(p&&!['SCRIPT','STYLE'].includes(p.tagName)&&node.nodeValue.includes('DIICOT'))node.nodeValue=swap(node.nodeValue);return;}
-    if(node.nodeType!==1||['SCRIPT','STYLE'].includes(node.tagName))return;
-    ['placeholder','title','aria-label','alt'].forEach(a=>{if(node.hasAttribute(a)&&node.getAttribute(a).includes('DIICOT'))node.setAttribute(a,swap(node.getAttribute(a)));});
-    node.childNodes.forEach(processNode);
-  };
-  processNode(document.body);
-  new MutationObserver(list=>list.forEach(m=>m.addedNodes.forEach(processNode))).observe(document.body,{childList:true,subtree:true});
-});
-</script>
-<style id="police-layout-final-v4">
-/* Corecții finale după testul live: aliniere, hero, logo și profil */
-.command-sidebar{width:236px!important}
-.command-main{margin-left:236px!important;width:calc(100vw - 236px)!important;max-width:none!important}
-.command-main>.command-topbar{width:100%!important;max-width:none!important;left:0!important;right:auto!important}
-.command-main>.dashboard-content{box-sizing:border-box!important;width:100%!important;max-width:none!important;margin:0!important;padding:22px 24px 52px!important}
-.dashboard-content>.dashboard-section{box-sizing:border-box!important;width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important}
-#overview.v5-overview{width:100%!important;max-width:none!important;margin:0!important;padding:0!important;gap:16px!important}
-.sidebar-brand{display:grid!important;grid-template-columns:54px minmax(0,1fr)!important;grid-template-rows:auto auto auto!important;column-gap:10px!important;align-items:center!important;min-height:126px!important;padding:22px 12px 20px!important}
-.sidebar-brand:before{grid-column:1!important;grid-row:1/4!important;position:static!important;margin:0!important}
-.sidebar-brand>strong{grid-column:2!important;grid-row:1!important;align-self:end!important;white-space:nowrap!important;font-size:18px!important}
-.sidebar-brand .command-name{grid-column:2!important;grid-row:2!important;align-self:start!important;white-space:normal!important;line-height:1.35!important}
-.sidebar-brand .v5-brand-quote{grid-column:2!important;grid-row:3!important;font-size:8px!important;white-space:normal!important;line-height:1.35!important}
-.sidebar-brand:after{right:12px!important;bottom:7px!important;font-size:7px!important}
-.v5-overview-hero{box-sizing:border-box!important;width:100%!important;min-height:330px!important;display:grid!important;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr)!important;align-items:center!important;padding:34px 36px!important}
-.v5-overview-hero:before{inset:0!important;width:100%!important;height:100%!important;border:0!important;border-radius:0!important;transform:none!important;box-shadow:none!important;background:linear-gradient(100deg,rgba(3,13,27,.96),rgba(5,28,52,.76) 64%,rgba(9,54,91,.42))!important}
-.v5-overview-hero:after{left:auto!important;right:24px!important;top:auto!important;bottom:20px!important;width:auto!important;height:auto!important;border:0!important;border-left:3px solid #1689ff!important;border-radius:0!important;transform:none!important;box-shadow:none!important;padding:9px 13px!important;background:rgba(3,17,33,.66)!important}
-#diicot-photo-hero .v5-hero-atmosphere,#diicot-photo-hero .v5-hero-atmosphere:before,#diicot-photo-hero .v5-hero-atmosphere:after{display:none!important}
-.v5-hero-copy{position:relative!important;inset:auto!important;width:auto!important;max-width:760px!important;padding:0!important;margin:0!important;transform:none!important}
-.v5-hero-copy h1{font-size:clamp(36px,4vw,62px)!important;line-height:1.02!important;overflow-wrap:anywhere!important;max-width:820px!important}
-.v5-hero-side{position:relative!important;inset:auto!important;width:100%!important;max-width:360px!important;padding:0!important;margin:0 0 0 auto!important;transform:none!important;align-self:center!important}
-.v5-clock-panel{width:100%!important}.v5-hero-statuses{flex-wrap:wrap!important;justify-content:flex-end!important}
-.v5-stats-grid{width:100%!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:14px!important}
-.v5-dashboard-grid{width:100%!important;grid-template-columns:minmax(0,1.2fr) minmax(340px,.8fr)!important}
-.v5-bottom-grid{width:100%!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}
-#profile .profile-v4-avatar-wrap{display:flex!important;align-items:center!important;justify-content:center!important}
-#profile .profile-v4-avatar-ring{width:154px!important;height:154px!important;display:grid!important;place-items:center!important}
-#profile .profile-avatar,#profile .profile-v4-avatar-ring .profile-avatar{display:block!important;width:138px!important;height:138px!important;min-width:138px!important;object-fit:cover!important;border-radius:50%!important;background:#071a30!important}
-@media(max-width:1200px){.v5-overview-hero{grid-template-columns:1fr!important}.v5-hero-side{margin:20px 0 0!important;max-width:500px!important}.v5-hero-statuses{justify-content:flex-start!important}.v5-stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.v5-bottom-grid{grid-template-columns:1fr 1fr!important}.v5-quick-panel{grid-column:1/-1!important}}
-@media(max-width:980px){.command-sidebar{width:214px!important}.command-main{margin-left:214px!important;width:calc(100vw - 214px)!important}.command-main>.dashboard-content{padding:18px!important}.v5-dashboard-grid{grid-template-columns:1fr!important}}
-@media(max-width:760px){.command-sidebar{width:100%!important}.command-main{margin-left:0!important;width:100%!important}.v5-overview-hero{padding:27px 21px!important}.v5-hero-copy h1{font-size:36px!important}.v5-stats-grid,.v5-bottom-grid{grid-template-columns:1fr!important}.v5-quick-panel{grid-column:auto!important}}
-</style>
-<script id="police-avatar-fallback-v4">
-document.addEventListener('DOMContentLoaded',()=>{
-  const fallback='https://cdn.discordapp.com/embed/avatars/0.png';
-  const protect=img=>{if(!(img instanceof HTMLImageElement)||img.dataset.avatarFallback)return;img.dataset.avatarFallback='1';img.addEventListener('error',()=>{if(img.src!==fallback)img.src=fallback;});};
-  document.querySelectorAll('#dashboard-avatar,#profile-avatar,.personnel-avatar,.profile-avatar').forEach(protect);
-  new MutationObserver(list=>list.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType!==1)return;protect(n);n.querySelectorAll?.('img').forEach(protect);}))).observe(document.body,{childList:true,subtree:true});
+ const clean=s=>String(s||'')
+  .replace(/DIICOT ROMÂNIA/g,'POLIȚIA ROMÂNĂ')
+  .replace(/Conducerea DIICOT/gi,'Conducerea Poliției')
+  .replace(/Personal DIICOT/gi,'Personal Poliție')
+  .replace(/Membru DIICOT/gi,'Membru Poliție')
+  .replace(/membrii DIICOT/gi,'membrii Poliției')
+  .replace(/structura DIICOT/gi,'structura Poliției')
+  .replace(/Ședință DIICOT/gi,'Ședință Poliție')
+  .replace(/DIICOT • CENTRU DE COMANDĂ/g,'POLIȚIA • CENTRU DE COMANDĂ')
+  .replace(/DIICOT/g,'POLIȚIA ROMÂNĂ');
+ const visit=n=>{if(n.nodeType===3){const p=n.parentElement;if(p&&!['SCRIPT','STYLE'].includes(p.tagName)&&/DIICOT/i.test(n.nodeValue))n.nodeValue=clean(n.nodeValue);return}if(n.nodeType!==1||['SCRIPT','STYLE'].includes(n.tagName))return;['placeholder','title','aria-label','alt'].forEach(a=>{const v=n.getAttribute(a);if(v&&/DIICOT/i.test(v))n.setAttribute(a,clean(v))});n.childNodes.forEach(visit)};
+ visit(document.body);
+ new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(visit))).observe(document.body,{childList:true,subtree:true});
+ const fallback='https://cdn.discordapp.com/embed/avatars/0.png';
+ const bind=img=>{if(!img||img.dataset.fallbackBound)return;img.dataset.fallbackBound='1';img.addEventListener('error',()=>{if(img.src!==fallback)img.src=fallback})};
+ document.querySelectorAll('#dashboard-avatar,#profile-avatar,.profile-avatar').forEach(bind);
 });
 </script>
 </body>
