@@ -4491,9 +4491,16 @@ app.post(
                 .trim()
                 .toUpperCase();
 
-        // Descrierea a fost eliminată din formular. Păstrăm câmpul gol
-        // în JSON pentru compatibilitate cu rapoartele mai vechi.
-        const description = "";
+        const rawDetails =
+            req.body.details && typeof req.body.details === "object"
+                ? req.body.details
+                : {};
+
+        const cleanDetail = (key, max = 1500) =>
+            String(rawDetails[key] || "").trim().slice(0, max);
+
+        let details = null;
+        let description = "";
 
         const allowedTypes = [
             "RAZIE",
@@ -4501,11 +4508,10 @@ app.post(
             "DOVADA RAZIE",
             "DOVADA ANTRENAMENT",
             "REGRUPARE",
-            "JAFURI",
-            "PATRULA",
             "PERCHEZITIE",
-            "VERIFICARE ZONA",
-            "FOCURI DE ARMA"
+            "BULETINE VAMA",
+            "OMOLOGARI",
+            "SANCTIUNI"
         ];
 
         if (!allowedTypes.includes(type)) {
@@ -4513,6 +4519,47 @@ app.post(
                 error:
                     "Tipul raportului nu este valid."
             });
+        }
+
+        if (type === "BULETINE VAMA") {
+            details = {
+                holderName: cleanDetail("holderName", 120),
+                cnp: cleanDetail("cnp", 30),
+                document: cleanDetail("document")
+            };
+            if (!details.holderName || !details.cnp || !details.document) {
+                return res.status(400).json({ error: "Completează toate datele buletinului vamal." });
+            }
+            description = `Titular: ${details.holderName}\nCNP: ${details.cnp}\nBuletin vamal: ${details.document}`;
+        }
+
+        if (type === "OMOLOGARI") {
+            details = {
+                ownerName: cleanDetail("ownerName", 120),
+                homologationAgent: cleanDetail("homologationAgent", 120),
+                cnp: cleanDetail("cnp", 30),
+                modifications: cleanDetail("modifications"),
+                costPerModification: "500.000 $"
+            };
+            if (!details.ownerName || !details.homologationAgent || !details.cnp || !details.modifications) {
+                return res.status(400).json({ error: "Completează toate datele omologării." });
+            }
+            description = `Nume: ${details.ownerName}\nOmologare efectuată de: ${details.homologationAgent}\nCNP: ${details.cnp}\nModificări: ${details.modifications}\nCost/modificare: 500.000 $`;
+        }
+
+        if (type === "SANCTIUNI") {
+            details = {
+                agentName: cleanDetail("agentName", 120),
+                suspectName: cleanDetail("suspectName", 120),
+                fineReason: cleanDetail("fineReason", 1000),
+                fineAmount: cleanDetail("fineAmount", 50),
+                jailReason: cleanDetail("jailReason", 1000),
+                jailDuration: cleanDetail("jailDuration", 50)
+            };
+            if (Object.values(details).some(value => !value)) {
+                return res.status(400).json({ error: "Completează toate datele sancțiunii." });
+            }
+            description = `Agent: ${details.agentName}\nSuspect: ${details.suspectName}\nMotiv amendă: ${details.fineReason}\nAmendă: ${details.fineAmount}\nMotiv închisoare: ${details.jailReason}\nÎnchisoare: ${details.jailDuration}`;
         }
 
         // RAZIE / ANTRENAMENT normale pot fi postate doar de SUB INSPECTOR DIICOT+.
@@ -4547,6 +4594,15 @@ app.post(
             return res.status(400).json({
                 error:
                     "Pentru DOVADĂ RAZIE / DOVADĂ ANTRENAMENT trebuie să încarci cel puțin o poză."
+            });
+        }
+
+        if (
+            ["BULETINE VAMA", "SANCTIUNI"].includes(type) &&
+            uploadedImages.length < 1
+        ) {
+            return res.status(400).json({
+                error: "Pentru acest tip de raport trebuie să încarci cel puțin o poză."
             });
         }
 
@@ -4699,6 +4755,8 @@ app.post(
                 type,
                 title,
                 description,
+
+                details,
 
                 coOrganizer:
                     coOrganizer,
