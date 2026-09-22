@@ -11145,7 +11145,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
             <span
                 class="sidebar-group-title admin-only"
             >
-                CONDUCERE
+                ADMINISTRARE
             </span>
 
 
@@ -11155,7 +11155,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data-section="leadership"
                 type="button"
             >
-                CONDUCERE
+                ANUNȚURI
             </button>
 
 
@@ -11444,7 +11444,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                             <button type="button" data-home-section="new-report"><b>▤</b><span>Raport nou</span></button>
                             <button type="button" data-home-section="leave"><b>▣</b><span>Concediu</span></button>
                             <button type="button" data-home-section="personnel"><b>♟</b><span>Personal</span></button>
-                            <button type="button" class="admin-only" data-home-section="leadership"><b>♛</b><span>Conducere</span></button>
+                            <button type="button" class="admin-only" data-home-section="leadership"><b>♛</b><span>Anunțuri</span></button>
                         </div>
                     </section>
                 </div>
@@ -13147,7 +13147,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
 
 
             <!-- =====================================================
-                 CONDUCERE DIICOT
+                 ANUNȚURI POLIȚIA ROMÂNĂ
             ====================================================== -->
 
             <section
@@ -13165,7 +13165,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
 
 
                     <h2>
-                        Conducere DIICOT
+                        Anunțuri
                     </h2>
 
 
@@ -13194,7 +13194,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                                     type="text"
                                     id="announcement-title"
                                     maxlength="120"
-                                    placeholder="Ex: Ședință generală DIICOT"
+                                    placeholder="Ex: Ședință generală Poliția Română"
                                     required
                                 >
 
@@ -13226,18 +13226,14 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                             <div class="form-group">
 
 
-                                <label for="announcement-structure">
-                                    STRUCTURĂ
+                                <label for="announcement-destination">
+                                    DESTINAȚIE DISCORD
                                 </label>
 
-
-                                <input
-                                    type="text"
-                                    id="announcement-structure"
-                                    maxlength="120"
-                                    placeholder="Ex: CONDUCERE DIICOT"
-                                    value="CONDUCERE DIICOT"
-                                >
+                                <select id="announcement-destination" required>
+                                    <option value="POLITIE">ANUNȚURI POLIȚIE</option>
+                                    <option value="COMUNE">ANUNȚURI COMUNE</option>
+                                </select>
 
 
                             </div>
@@ -13295,7 +13291,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
 
 
                                         <strong id="announcement-preview-author">
-                                            Membru DIICOT
+                                            Membru Poliția Română
                                         </strong>
 
 
@@ -13335,7 +13331,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                                     STRUCTURĂ •
 
                                     <span id="announcement-preview-structure">
-                                        CONDUCERE DIICOT
+                                        POLIȚIA ROMÂNĂ
                                     </span>
 
                                 </div>
@@ -25845,9 +25841,9 @@ const query =
         );
 
 
-    const announcementStructure =
+    const announcementDestination =
         document.getElementById(
-            "announcement-structure"
+            "announcement-destination"
         );
 
 
@@ -25888,11 +25884,9 @@ const query =
                 "announcement-preview-structure"
             )
             .textContent =
-                announcementStructure
-                    .value
-                    .trim() ||
-
-                "CONDUCERE DIICOT";
+                announcementDestination.value === "COMUNE"
+                    ? "ANUNȚURI COMUNE"
+                    : "POLIȚIA ROMÂNĂ";
 
     }
 
@@ -25906,7 +25900,7 @@ const query =
         updateAnnouncementPreview;
 
 
-    announcementStructure.oninput =
+    announcementDestination.onchange =
         updateAnnouncementPreview;
 
 
@@ -25981,10 +25975,8 @@ const query =
                                                 .value
                                                 .trim(),
 
-                                        structure:
-                                            announcementStructure
-                                                .value
-                                                .trim()
+                                        destination:
+                                            announcementDestination.value
 
                                     })
                             }
@@ -26021,8 +26013,8 @@ const query =
                         "";
 
 
-                    announcementStructure.value =
-                        "CONDUCERE DIICOT";
+                    announcementDestination.value =
+                        "POLITIE";
 
 
                     updateAnnouncementPreview();
