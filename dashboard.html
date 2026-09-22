@@ -12752,12 +12752,22 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                         >
 
                         <span
-                            id="docs-count"
+                            id="docs-total"
                             class="personnel-summary"
                             style="margin:0;"
                         >
-                            <span>CALLSIGN-URI POLIȚIE</span>
-                            <strong>99</strong>
+                            <span>LOCURI TOTALE</span>
+                            <strong>0</strong>
+                        </span>
+
+                        <span id="docs-occupied" class="personnel-summary" style="margin:0;">
+                            <span>LOCURI OCUPATE</span>
+                            <strong>0</strong>
+                        </span>
+
+                        <span id="docs-available" class="personnel-summary" style="margin:0;">
+                            <span>LOCURI LIBERE</span>
+                            <strong>0</strong>
                         </span>
 
                     </div>
@@ -17223,10 +17233,9 @@ document
                 "docs-table-body"
             );
 
-        const count =
-            document.querySelector(
-                "#docs-count strong"
-            );
+        const totalElement = document.querySelector("#docs-total strong");
+        const occupiedElement = document.querySelector("#docs-occupied strong");
+        const availableElement = document.querySelector("#docs-available strong");
 
         const adminBadge =
             document.getElementById(
@@ -17288,10 +17297,15 @@ const query =
                 }
             );
 
-        if (count) {
-            count.textContent =
-                String(filtered.length);
-        }
+        const totalPlaces = docsRows.length;
+        const occupiedPlaces = docsRows.filter(row =>
+            Boolean(String(row.discordId || "").trim())
+        ).length;
+        const availablePlaces = Math.max(0, totalPlaces - occupiedPlaces);
+
+        if (totalElement) totalElement.textContent = String(totalPlaces);
+        if (occupiedElement) occupiedElement.textContent = String(occupiedPlaces);
+        if (availableElement) availableElement.textContent = String(availablePlaces);
 
         if (!filtered.length) {
 
