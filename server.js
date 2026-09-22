@@ -44,14 +44,9 @@ const GUILD_ID = process.env.DISCORD_GUILD_ID;
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 
 const CALLSIGN_LOG_CHANNEL_ID = "1547395877503500318";
-const PUBLIC_BASE_URL = String(
-    process.env.PUBLIC_BASE_URL ||
-    process.env.RENDER_EXTERNAL_URL ||
-    ""
-).replace(/\/$/, "");
 const CALLSIGN_DASHBOARD_URL =
     process.env.CALLSIGN_DASHBOARD_URL ||
-    (PUBLIC_BASE_URL ? `${PUBLIC_BASE_URL}/dashboard` : "/dashboard");
+    "https://diicot-07hy.onrender.com/dashboard.html";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -92,7 +87,7 @@ if (
 // ======================================================
 const B2_DIRECT_UPLOAD_ORIGIN =
     process.env.B2_DIRECT_UPLOAD_ORIGIN ||
-    PUBLIC_BASE_URL;
+    "https://diicot-07hy.onrender.com";
 
 async function configureB2CorsForDirectUpload() {
     if (
@@ -100,8 +95,7 @@ async function configureB2CorsForDirectUpload() {
         !B2_REGION ||
         !B2_ENDPOINT ||
         !B2_KEY_ID ||
-        !B2_APPLICATION_KEY ||
-        !B2_DIRECT_UPLOAD_ORIGIN
+        !B2_APPLICATION_KEY
     ) {
         console.warn(
             "[BACKBLAZE B2 CORS] Configurarea CORS a fost omisă: lipsesc variabile B2_*."
@@ -170,79 +164,27 @@ const supabase = createClient(
 
 
 // ======================================================
-// GRADE DIICOT
+// GRADE POLITIA ROMANA
 // ======================================================
 
-// IMPORTANT: INSPECTOR ROLE IDS
-// INSPECTOR DIICOT           = 1528758226416435213 (level 5)
-// INSPECTOR PRINCIPAL DIICOT = 1528758226416435214 (level 6)
-// Nu inversa aceste două ID-uri.
+// Numele vechi DIICOT_ROLES este păstrat intern pentru compatibilitate
+// cu restul aplicației, dar lista conține exclusiv gradele Poliției.
 const DIICOT_ROLES = [
-    {
-        id: "1528758226420633746",
-        name: "PROCUROR ȘEF DIICOT",
-        level: 13
-    },
-    {
-        id: "1528758226420633745",
-        name: "PROCUROR ȘEF ADJUNCT DIICOT",
-        level: 12
-    },
-    {
-        id: "1528758226420633744",
-        name: "PROCUROR DIICOT",
-        level: 11
-    },
-    {
-        id: "1528758226416435219",
-        name: "COORDONATOR DIICOT",
-        level: 10
-    },
-    {
-        id: "1528758226416435217",
-        name: "COMISAR ȘEF DIICOT",
-        level: 9
-    },
-    {
-        id: "1528758226416435216",
-        name: "COMISAR DIICOT",
-        level: 8
-    },
-    {
-        id: "1528758226416435215",
-        name: "SUB COMISAR DIICOT",
-        level: 7
-    },
-    {
-        id: "1528758226416435214",
-        name: "INSPECTOR PRINCIPAL DIICOT",
-        level: 6
-    },
-    {
-        id: "1528758226416435213",
-        name: "INSPECTOR DIICOT",
-        level: 5
-    },
-    {
-        id: "1528758226416435211",
-        name: "SUB INSPECTOR DIICOT",
-        level: 4
-    },
-    {
-        id: "1528758226416435210",
-        name: "AGENT PRINCIPAL DIICOT",
-        level: 3
-    },
-    {
-        id: "1528758226407919645",
-        name: "AGENT OPERATIV DIICOT",
-        level: 2
-    },
-    {
-        id: "1528758226407919644",
-        name: "AGENT STAGIAR DIICOT",
-        level: 1
-    }
+    { id: "1528758226437275791", name: "RESPONSABIL GUVERNAMENTALE", level: 15 },
+    { id: "1528758226437275788", name: "CHESTOR GENERAL", level: 14 },
+    { id: "1528758226437275787", name: "CHESTOR PRINCIPAL", level: 13 },
+    { id: "1528758226437275786", name: "CHESTOR SECUNDAR", level: 12 },
+    { id: "1528758226428891368", name: "COMISAR ȘEF", level: 11 },
+    { id: "1528758226428891366", name: "COMISAR", level: 10 },
+    { id: "1528758226428891365", name: "SUB COMISAR", level: 9 },
+    { id: "1528758226428891364", name: "INSPECTOR PRINCIPAL", level: 8 },
+    { id: "1528758226428891363", name: "INSPECTOR", level: 7 },
+    { id: "1528758226428891362", name: "SUB INSPECTOR", level: 6 },
+    { id: "1528758226428891361", name: "AGENT ȘEF PRINCIPAL", level: 5 },
+    { id: "1528758226428891360", name: "AGENT ȘEF ADJUNCT", level: 4 },
+    { id: "1528758226428891359", name: "AGENT PRINCIPAL", level: 3 },
+    { id: "1528758226420633752", name: "AGENT", level: 2 },
+    { id: "1528758226420633750", name: "CADET", level: 1 }
 ];
 
 
@@ -267,12 +209,16 @@ const REPORT_ORGANIZER_DEPARTMENTS = {
     ],
 
     POLITIE: [
-        { id: "1528758226428891362", name: "SUB INSPECTOR POLIȚIE", weight: 1 },
-        { id: "1528758226428891363", name: "INSPECTOR POLIȚIE", weight: 2 },
-        { id: "1528758226428891364", name: "INSPECTOR PRINCIPAL POLIȚIE", weight: 3 },
-        { id: "1528758226428891365", name: "SUB COMISAR POLIȚIE", weight: 4 },
-        { id: "1528758226428891366", name: "COMISAR POLIȚIE", weight: 5 },
-        { id: "1528758226428891368", name: "COMISAR ȘEF POLIȚIE", weight: 6 }
+        { id: "1528758226428891362", name: "SUB INSPECTOR", weight: 1 },
+        { id: "1528758226428891363", name: "INSPECTOR", weight: 2 },
+        { id: "1528758226428891364", name: "INSPECTOR PRINCIPAL", weight: 3 },
+        { id: "1528758226428891365", name: "SUB COMISAR", weight: 4 },
+        { id: "1528758226428891366", name: "COMISAR", weight: 5 },
+        { id: "1528758226428891368", name: "COMISAR ȘEF", weight: 6 },
+        { id: "1528758226437275786", name: "CHESTOR SECUNDAR", weight: 7 },
+        { id: "1528758226437275787", name: "CHESTOR PRINCIPAL", weight: 8 },
+        { id: "1528758226437275788", name: "CHESTOR GENERAL", weight: 9 },
+        { id: "1528758226437275791", name: "RESPONSABIL GUVERNAMENTALE", weight: 10 }
     ]
 };
 
@@ -2984,11 +2930,6 @@ function requireTester(
 // PAGINI
 // ======================================================
 
-// Endpoint simplu pentru verificarea serviciului in Render.
-app.get("/health", (req, res) => {
-    res.status(200).json({ ok: true });
-});
-
 app.get(
     "/",
 
@@ -3336,7 +3277,7 @@ app.get(
                 rank:
                     rank
                         ? rank.name
-                        : "MEMBRU DIICOT",
+                        : "MEMBRU POLIȚIE",
 
                 rankLevel:
                     rank
@@ -3436,7 +3377,7 @@ app.get(
                 req.session.user.rank =
                     rank
                         ? rank.name
-                        : "MEMBRU DIICOT";
+                        : "MEMBRU POLIȚIE";
 
                 req.session.user.rankLevel =
                     rank
@@ -3607,7 +3548,7 @@ app.get(
                     req.session.user.rank =
                         rank
                             ? rank.name
-                            : "MEMBRU DIICOT";
+                            : "MEMBRU POLIȚIE";
 
                     req.session.user.rankLevel =
                         rank
@@ -3737,7 +3678,12 @@ app.get(
 
                     displayName,
 
-                    avatar,
+                    // Trimitem URL complet. Dashboard-ul acceptă și hash,
+                    // însă URL-ul evită avatarul gol din pagina de profil.
+                    avatar:
+                        discordMember?.user
+                            ? discordMemberAvatar(discordMember.user)
+                            : discordMemberAvatar({ id: userId, avatar }),
 
                     rank:
                         req.session.user.rank,
