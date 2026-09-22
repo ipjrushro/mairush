@@ -745,8 +745,8 @@ async function readDutyRecord(userId) {
         if (status === 404 || name === "NoSuchKey" || name === "NotFound") {
             return { userId: String(userId), active: false, activeSince: null, sessions: [] };
         }
-        console.error("Duty B2 Read Error:", dutyB2Key(userId), error?.message || error);
-        return { userId: String(userId), active: false, activeSince: null, sessions: [], readError: String(error?.message || error) };
+        console.error("Duty B2 Read Error:", error?.message || error);
+        return { userId: String(userId), active: false, activeSince: null, sessions: [] };
     }
 }
 
@@ -777,8 +777,7 @@ function formatDutyDuration(ms) {
     const safe = Math.max(0, Number(ms || 0));
     const hours = Math.floor(safe / 3600000);
     const minutes = Math.floor((safe % 3600000) / 60000);
-    const seconds = Math.floor((safe % 60000) / 1000);
-    return `${hours}h ${minutes}m ${seconds}s`;
+    return `${hours}h ${minutes}m`;
 }
 
 
@@ -1136,8 +1135,7 @@ async function buildPromotionEligibility(
         dutyMs,
         dutyHours,
         dutyFormatted: formatDutyDuration(dutyMs),
-        dutyActive: Boolean(dutyRecord?.active),
-        dutyReadError: dutyRecord?.readError || null
+        dutyActive: Boolean(dutyRecord?.active)
     };
 
     const numericEligible =
@@ -2890,7 +2888,8 @@ function requireAuth(
 // Acces complet: COMISAR ȘEF+ și cele două persoane desemnate.
 const POLICE_FULL_ACCESS_IDS = new Set([
     "803998303230230538",
-    "927528327156203560"
+    "927528327156203560",
+    "1315733546312142921"
 ]);
 
 function hasPoliceFullAccess(user) {
