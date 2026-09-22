@@ -1,23 +1,25 @@
 {
-  "name": "mairush-politie",
-  "version": "2.0.0",
+  "name": "politie-command-center",
+  "version": "1.0.0",
   "private": true,
-  "description": "Rush Romania - portal comunitar Politia Romana",
+  "description": "Configuratie Render pentru centrul de comanda Politie",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "check": "node --check server.js"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20 <25"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.890.0",
-    "@supabase/supabase-js": "^2.57.4",
-    "axios": "^1.12.2",
-    "cookie-session": "^2.1.0",
-    "dotenv": "^17.2.2",
-    "express": "^4.21.2",
-    "multer": "^2.0.2",
-    "@aws-sdk/s3-request-presigner": "^3.890.0"
+    "@aws-sdk/client-s3": "^3.0.0",
+    "@aws-sdk/s3-request-presigner": "^3.0.0",
+    "@supabase/supabase-js": "^2.0.0",
+    "axios": "^1.0.0",
+    "compression": "^1.0.0",
+    "cookie-session": "^2.0.0",
+    "dotenv": "^16.0.0",
+    "express": "^4.21.0",
+    "multer": "^2.0.2"
   }
 }
