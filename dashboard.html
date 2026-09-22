@@ -27288,7 +27288,7 @@ const query =
                     <div class="profile-up-progress-top">
                         <span>PONTAJ</span>
                         <strong id="profile-up-duty">
-                            ${escapeHTML(progress.dutyFormatted || "0h 0m")} / ${Number(req.dutyHours || 0)}h${progress.dutyActive ? " • ON DUTY" : ""}
+                            ${escapeHTML(progress.dutyFormatted || "0h 0m 0s")} / ${Number(req.dutyHours || 0)}h${progress.dutyActive ? " • ON DUTY" : ""}${progress.dutyReadError ? " • EROARE B2" : ""}
                         </strong>
                     </div>
                     <div class="profile-up-bar">
@@ -27557,6 +27557,20 @@ const query =
                     profile.rank ||
                     currentUser?.rank ||
                     "-";
+
+
+            // Profilul este citit live din Discord. Folosim aceeași valoare și
+            // în bara de sus ca să nu rămână un grad vechi din cache-ul /api/me.
+            if (profile.rank) {
+                if (currentUser) {
+                    currentUser.rank = profile.rank;
+                    currentUser.rankLevel = Number(profile.rankLevel || currentUser.rankLevel || 0);
+                }
+                const dashboardRank = document.getElementById("dashboard-rank");
+                const welcomeRank = document.getElementById("welcome-rank");
+                if (dashboardRank) dashboardRank.textContent = profile.rank;
+                if (welcomeRank) welcomeRank.textContent = profile.rank;
+            }
 
 
             document
@@ -32758,6 +32772,48 @@ document.addEventListener('DOMContentLoaded',()=>{
  const bind=img=>{if(!img||img.dataset.fallbackBound)return;img.dataset.fallbackBound='1';img.addEventListener('error',()=>{if(img.src!==fallback)img.src=fallback})};
  document.querySelectorAll('#dashboard-avatar,#profile-avatar,.profile-avatar').forEach(bind);
 });
+
+
+    // Actualizare live pentru pontajul din profil. Nu reîncarcă toată pagina;
+    // recitește doar profilul și redesenează progresul la fiecare 15 secunde.
+    let profileDutyRefreshBusy = false;
+    setInterval(async () => {
+        const card = document.getElementById("profile-up-eligibility");
+        const profileSection = document.getElementById("profile-section");
+        if (!card || !profileSection || profileDutyRefreshBusy) return;
+
+        const style = window.getComputedStyle(profileSection);
+        if (style.display === "none" || style.visibility === "hidden") return;
+
+        profileDutyRefreshBusy = true;
+        try {
+            const response = await fetch("/api/profile", {
+                credentials: "include",
+                cache: "no-store"
+            });
+            if (!response.ok) return;
+            const data = await response.json();
+            const profile = data.profile;
+            if (!profile) return;
+
+            renderProfilePromotionEligibility(profile.promotionEligibility);
+
+            if (profile.rank) {
+                if (currentUser) {
+                    currentUser.rank = profile.rank;
+                    currentUser.rankLevel = Number(profile.rankLevel || currentUser.rankLevel || 0);
+                }
+                const dashboardRank = document.getElementById("dashboard-rank");
+                const welcomeRank = document.getElementById("welcome-rank");
+                if (dashboardRank) dashboardRank.textContent = profile.rank;
+                if (welcomeRank) welcomeRank.textContent = profile.rank;
+            }
+        } catch (error) {
+            console.warn("Refresh pontaj profil:", error?.message || error);
+        } finally {
+            profileDutyRefreshBusy = false;
+        }
+    }, 15000);
 </script>
 </body>
 </html>
