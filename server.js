@@ -15358,6 +15358,354 @@ app.use(
 );
 
 
+
+// ======================================================
+// TRANSFER INTERDEPARTAMENTAL — POLITIE <-> DIICOT
+// Persistenta: Backblaze B2
+// Flux: solicitare -> aprobare Politie + aprobare DIICOT -> rol Discord nou
+// ======================================================
+
+const TRANSFER_STATE_KEY = "transfers/interdepartmental-requests.json";
+const TRANSFER_POLICE_ROLES = DIICOT_ROLES.map(role => String(role.id));
+
+const TRANSFER_DIICOT_ROLES = [
+    { id: "1528758226407919644", name: "AGENT STAGIAR", level: 1 },
+    { id: "1528758226407919645", name: "AGENT OPERATIV", level: 2 },
+    { id: "1528758226416435210", name: "AGENT PRINCIPAL", level: 3 },
+    { id: "1528758226416435211", name: "SUB-INSPECTOR", level: 4 },
+    { id: "1528758226416435213", name: "INSPECTOR", level: 5 },
+    { id: "1528758226416435214", name: "INSPECTOR PRINCIPAL", level: 6 },
+    { id: "1528758226416435215", name: "SUB-COMISAR", level: 7 },
+    { id: "1528758226416435216", name: "COMISAR", level: 8 },
+    { id: "1528758226416435217", name: "COMISAR ȘEF", level: 9 },
+    { id: "1528758226416435219", name: "COORDONATOR", level: 10 },
+    { id: "1528758226420633744", name: "PROCUROR", level: 11 },
+    { id: "1528758226420633745", name: "PROCUROR ȘEF ADJUNCT", level: 12 },
+    { id: "1528758226420633746", name: "PROCUROR ȘEF", level: 13 }
+];
+
+const TRANSFER_DIICOT_ROLE_IDS = TRANSFER_DIICOT_ROLES.map(role => String(role.id));
+const TRANSFER_DIICOT_LEADERSHIP_IDS = new Set([
+    "1528758226416435219",
+    "1528758226420633744",
+    "1528758226420633745",
+    "1528758226420633746"
+]);
+
+let transferState = { requests: [] };
+let transferStateLoaded = false;
+
+function normalizeTransferDepartment(value) {
+    const v = String(value || "").trim().toUpperCase();
+    return v === "POLITIE" || v === "DIICOT" ? v : "";
+}
+
+function getTransferRank(roles = [], department = "") {
+    const roleSet = new Set((Array.isArray(roles) ? roles : []).map(String));
+    const list = department === "DIICOT" ? TRANSFER_DIICOT_ROLES : DIICOT_ROLES;
+    return [...list]
+        .sort((a, b) => Number(b.level || 0) - Number(a.level || 0))
+        .find(role => roleSet.has(String(role.id))) || null;
+}
+
+function canApprovePoliceTransfer(user) {
+    return hasPoliceFullAccess(user);
+}
+
+function canApproveDiicotTransfer(user) {
+    const roles = new Set((user?.roles || []).map(String));
+    return [...TRANSFER_DIICOT_LEADERSHIP_IDS].some(id => roles.has(id));
+}
+
+async function loadTransferState() {
+    if (transferStateLoaded) return transferState;
+    transferStateLoaded = true;
+
+    if (!meetingAttendanceB2Ready()) {
+        console.warn("[TRANSFER] B2 nu este configurat; cererile vor rămâne doar în memoria instanței.");
+        return transferState;
+    }
+
+    try {
+        const state = await readB2JSON(TRANSFER_STATE_KEY);
+        transferState = {
+            requests: Array.isArray(state?.requests) ? state.requests : []
+        };
+    } catch (error) {
+        const status = Number(error?.$metadata?.httpStatusCode || error?.statusCode || 0);
+        const name = String(error?.name || "");
+        if (status !== 404 && !/NoSuchKey|NotFound/i.test(name)) {
+            console.warn("[TRANSFER] Load warning:", error?.message || error);
+        }
+    }
+
+    return transferState;
+}
+
+async function saveTransferState() {
+    if (!meetingAttendanceB2Ready()) return;
+
+    await b2.send(new PutObjectCommand({
+        Bucket: B2_BUCKET,
+        Key: TRANSFER_STATE_KEY,
+        Body: JSON.stringify(transferState, null, 2),
+        ContentType: "application/json; charset=utf-8",
+        CacheControl: "no-store"
+    }));
+}
+
+function publicTransferRequest(row, user) {
+    return {
+        ...row,
+        canDecidePolice: canApprovePoliceTransfer(user),
+        canDecideDiicot: canApproveDiicotTransfer(user)
+    };
+}
+
+async function transferDiscordRoles(request) {
+    const userId = String(request.userId || "");
+    const source = normalizeTransferDepartment(request.source);
+    const destination = source === "POLITIE" ? "DIICOT" : "POLITIE";
+
+    if (!userId || !source) throw new Error("Datele transferului sunt invalide.");
+
+    const member = await getDiscordMemberCached(userId, { force: true });
+    const currentRoles = new Set((member?.roles || []).map(String));
+
+    const removeIds = source === "POLITIE"
+        ? TRANSFER_POLICE_ROLES
+        : TRANSFER_DIICOT_ROLE_IDS;
+
+    const targetRoleId = destination === "DIICOT"
+        ? "1528758226407919644" // Agent Stagiar
+        : "1528758226420633750"; // Cadet
+
+    for (const roleId of removeIds) {
+        if (currentRoles.has(String(roleId))) {
+            await setDiscordMemberRole(userId, roleId, false);
+        }
+    }
+
+    await setDiscordMemberRole(userId, targetRoleId, true);
+
+    return {
+        destination,
+        targetRoleId,
+        targetRank: destination === "DIICOT" ? "AGENT STAGIAR" : "CADET"
+    };
+}
+
+app.get("/api/transfers", requireAuth, async (req, res) => {
+    try {
+        await loadTransferState();
+
+        const user = req.session.user;
+        const userId = String(user.id || "");
+        const policeLeadership = canApprovePoliceTransfer(user);
+        const diicotLeadership = canApproveDiicotTransfer(user);
+
+        let requests = transferState.requests || [];
+
+        // Conducerea vede toate cererile, membrul vede doar cererile sale.
+        if (!policeLeadership && !diicotLeadership) {
+            requests = requests.filter(row => String(row.userId) === userId);
+        }
+
+        requests = [...requests].sort((a, b) =>
+            String(b.createdAt || "").localeCompare(String(a.createdAt || ""))
+        );
+
+        const roles = Array.isArray(user.roles) ? user.roles : [];
+        const policeRank = getTransferRank(roles, "POLITIE");
+        const diicotRank = getTransferRank(roles, "DIICOT");
+
+        return res.json({
+            success: true,
+            permissions: {
+                policeLeadership,
+                diicotLeadership
+            },
+            profile: {
+                discordId: userId,
+                displayName: user.displayName || user.globalName || user.username || "Membru",
+                policeRank: policeRank?.name || null,
+                diicotRank: diicotRank?.name || null
+            },
+            requests: requests.map(row => publicTransferRequest(row, user))
+        });
+    } catch (error) {
+        console.error("Transfer list error:", error);
+        return res.status(500).json({ error: "Cererile de transfer nu au putut fi încărcate." });
+    }
+});
+
+app.post("/api/transfers", requireAuth, async (req, res) => {
+    try {
+        await loadTransferState();
+
+        const source = normalizeTransferDepartment(req.body?.source);
+        const reason = String(req.body?.reason || "").trim();
+        const gameId = String(req.body?.gameId || "").trim();
+        const age = Number(req.body?.age || 0);
+        const user = req.session.user;
+        const roles = Array.isArray(user.roles) ? user.roles : [];
+
+        if (!source) return res.status(400).json({ error: "Structura de origine este invalidă." });
+        if (reason.length < 10) return res.status(400).json({ error: "Motivul transferului trebuie să aibă minimum 10 caractere." });
+        if (!/^[0-9]{1,10}$/.test(gameId)) return res.status(400).json({ error: "Introdu un ID valid din joc." });
+        if (!Number.isFinite(age) || age < 14 || age > 99) return res.status(400).json({ error: "Vârsta introdusă nu este validă." });
+
+        const currentRank = getTransferRank(roles, source);
+        if (!currentRank) {
+            return res.status(403).json({
+                error: source === "POLITIE"
+                    ? "Nu ai un grad activ în Poliția Română."
+                    : "Nu ai un grad activ în DIICOT."
+            });
+        }
+
+        const destination = source === "POLITIE" ? "DIICOT" : "POLITIE";
+        const userId = String(user.id);
+
+        const duplicate = (transferState.requests || []).find(row =>
+            String(row.userId) === userId &&
+            row.status === "PENDING"
+        );
+        if (duplicate) {
+            return res.status(409).json({ error: "Ai deja o cerere de transfer în așteptare." });
+        }
+
+        const now = new Date().toISOString();
+        const request = {
+            id: crypto.randomUUID(),
+            userId,
+            displayName: user.displayName || user.globalName || user.username || "Membru",
+            username: user.username || "",
+            gameId,
+            age,
+            source,
+            destination,
+            currentRank: currentRank.name,
+            currentRankRoleId: String(currentRank.id),
+            reason,
+            status: "PENDING",
+            policeDecision: "PENDING",
+            policeDecisionById: null,
+            policeDecisionByName: null,
+            policeDecisionAt: null,
+            diicotDecision: "PENDING",
+            diicotDecisionById: null,
+            diicotDecisionByName: null,
+            diicotDecisionAt: null,
+            createdAt: now,
+            completedAt: null,
+            targetRank: destination === "DIICOT" ? "AGENT STAGIAR" : "CADET"
+        };
+
+        transferState.requests.push(request);
+        await saveTransferState();
+
+        sendDiscordDM(
+            userId,
+            `📨 CERERE TRANSFER\n\nCererea ta de transfer ${source === "POLITIE" ? "POLIȚIA ROMÂNĂ" : "DIICOT"} → ${destination === "POLITIE" ? "POLIȚIA ROMÂNĂ" : "DIICOT"} a fost înregistrată.\n\nID joc: ${gameId}\nGrad actual: ${currentRank.name}\nStatus: așteaptă aprobarea ambelor conduceri.`
+        ).catch(err => console.warn("Transfer DM create:", err?.message || err));
+
+        return res.status(201).json({
+            success: true,
+            message: "Cererea de transfer a fost trimisă către ambele conduceri.",
+            request: publicTransferRequest(request, user)
+        });
+    } catch (error) {
+        console.error("Transfer create error:", error);
+        return res.status(500).json({ error: "Cererea de transfer nu a putut fi salvată." });
+    }
+});
+
+app.post("/api/transfers/:id/decision", requireAuth, async (req, res) => {
+    try {
+        await loadTransferState();
+
+        const id = String(req.params.id || "");
+        const department = normalizeTransferDepartment(req.body?.department);
+        const decision = String(req.body?.decision || "").trim().toUpperCase();
+        const user = req.session.user;
+
+        if (!["APPROVED", "REJECTED"].includes(decision)) {
+            return res.status(400).json({ error: "Decizia este invalidă." });
+        }
+
+        if (department === "POLITIE" && !canApprovePoliceTransfer(user)) {
+            return res.status(403).json({ error: "Nu ai acces la aprobarea conducerii Poliției." });
+        }
+        if (department === "DIICOT" && !canApproveDiicotTransfer(user)) {
+            return res.status(403).json({ error: "Nu ai acces la aprobarea conducerii DIICOT." });
+        }
+        if (!department) return res.status(400).json({ error: "Structura de aprobare este invalidă." });
+
+        const request = transferState.requests.find(row => String(row.id) === id);
+        if (!request) return res.status(404).json({ error: "Cererea nu a fost găsită." });
+        if (["REJECTED", "COMPLETED"].includes(request.status)) {
+            return res.status(400).json({ error: "Cererea este deja finalizată." });
+        }
+
+        const prefix = department === "POLITIE" ? "police" : "diicot";
+        if (request[`${prefix}Decision`] !== "PENDING") {
+            return res.status(400).json({ error: "Această conducere a luat deja o decizie." });
+        }
+
+        request[`${prefix}Decision`] = decision;
+        request[`${prefix}DecisionById`] = String(user.id);
+        request[`${prefix}DecisionByName`] = user.displayName || user.username || "Conducere";
+        request[`${prefix}DecisionAt`] = new Date().toISOString();
+
+        if (decision === "REJECTED") {
+            request.status = "REJECTED";
+        } else if (request.policeDecision === "APPROVED" && request.diicotDecision === "APPROVED") {
+            try {
+                const result = await transferDiscordRoles(request);
+                request.status = "COMPLETED";
+                request.completedAt = new Date().toISOString();
+                request.targetRank = result.targetRank;
+            } catch (discordError) {
+                console.error("Transfer Discord execution error:", discordError?.response?.data || discordError);
+                request.status = "APPROVED_WAITING_EXECUTION";
+                request.executionError = discordError?.response?.data?.message || discordError?.message || "Eroare Discord";
+            }
+        } else {
+            request.status = "PENDING";
+        }
+
+        await saveTransferState();
+
+        let dm = `📋 ACTUALIZARE TRANSFER\n\n${department === "POLITIE" ? "Conducerea Poliției" : "Conducerea DIICOT"} a ${decision === "APPROVED" ? "APROBAT" : "RESPINS"} cererea ta.`;
+        if (request.status === "COMPLETED") {
+            dm += `\n\n✅ Transferul a fost efectuat automat.\nNoul grad: ${request.targetRank}.`;
+        } else if (request.status === "REJECTED") {
+            dm += "\n\n❌ Cererea de transfer a fost închisă.";
+        } else if (request.status === "APPROVED_WAITING_EXECUTION") {
+            dm += "\n\n⚠️ Ambele conduceri au aprobat, dar modificarea rolurilor Discord trebuie reverificată.";
+        } else {
+            dm += "\n\nCererea așteaptă și decizia celeilalte conduceri.";
+        }
+
+        sendDiscordDM(String(request.userId), dm)
+            .catch(err => console.warn("Transfer DM decision:", err?.message || err));
+
+        return res.json({
+            success: true,
+            message: request.status === "COMPLETED"
+                ? "Ambele conduceri au aprobat. Transferul a fost efectuat."
+                : "Decizia a fost salvată.",
+            request: publicTransferRequest(request, user)
+        });
+    } catch (error) {
+        console.error("Transfer decision error:", error);
+        return res.status(500).json({ error: "Decizia nu a putut fi salvată." });
+    }
+});
+
+
+
 // ======================================================
 // START SERVER
 // ======================================================
