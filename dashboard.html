@@ -8831,6 +8831,364 @@
 .guide-home-card .home-action-icon{color:#f4c34d!important}
 @media(max-width:760px){.weapon-grid{grid-template-columns:1fr}.guide-hero{padding:22px}.guide-hero h2{font-size:24px}.guide-hero:after{display:none}.guide-step{grid-template-columns:36px 1fr}.guide-step-num{width:36px;height:36px}}
 
+
+
+/* =========================================================
+   RAPORT NOU V2 — POLITIA ROMANA / COMMAND DESK
+   Design-only override. Functional IDs and JS are preserved.
+========================================================= */
+#new-report{
+    --rp-gold:#f0b93d;
+    --rp-gold-2:#c88b18;
+    --rp-blue:#3b8cff;
+    --rp-line:rgba(122,153,190,.13);
+    --rp-panel:rgba(7,17,29,.92);
+    --rp-panel-2:rgba(10,23,39,.84);
+}
+#new-report .report-premium-shell{
+    position:relative;
+    overflow:visible;
+    padding:0;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    box-shadow:none;
+}
+#new-report .report-premium-shell:before{display:none}
+
+/* HERO */
+#new-report .report-premium-hero{
+    position:relative;
+    overflow:hidden;
+    min-height:190px;
+    margin-bottom:16px;
+    padding:30px 34px;
+    border:1px solid rgba(105,139,180,.16);
+    border-radius:20px;
+    background:
+        radial-gradient(circle at 88% 20%,rgba(240,185,61,.16),transparent 24%),
+        radial-gradient(circle at 68% 110%,rgba(59,140,255,.10),transparent 30%),
+        linear-gradient(135deg,rgba(10,23,39,.98),rgba(5,14,25,.96));
+    box-shadow:0 24px 65px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.025);
+}
+#new-report .report-premium-hero:before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background-image:
+        linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);
+    background-size:32px 32px;
+    mask-image:linear-gradient(90deg,transparent,black 55%,black);
+}
+#new-report .report-kicker{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    color:var(--rp-gold);
+    font-size:10px;
+    font-weight:950;
+    letter-spacing:1.8px;
+}
+#new-report .report-kicker:before{
+    content:"";
+    width:24px;height:2px;border-radius:10px;
+    background:var(--rp-gold);
+    box-shadow:0 0 12px rgba(240,185,61,.45);
+}
+#new-report .report-premium-hero h2{
+    margin:10px 0 8px;
+    font-size:clamp(34px,3vw,46px);
+    letter-spacing:-1.5px;
+    line-height:1;
+    font-weight:950;
+}
+#new-report .report-premium-hero p{
+    max-width:600px;
+    color:#8fa0b5;
+    font-size:13px;
+    line-height:1.65;
+}
+#new-report .report-hero-art{
+    width:190px;height:120px;
+}
+#new-report .report-hero-doc{
+    width:78px;height:92px;
+    display:grid;place-items:center;
+    border:1px solid rgba(240,185,61,.28);
+    border-radius:15px;
+    background:linear-gradient(145deg,rgba(240,185,61,.13),rgba(240,185,61,.035));
+    font-size:43px;
+    box-shadow:0 0 45px rgba(240,185,61,.08),inset 0 1px 0 rgba(255,255,255,.05);
+}
+#new-report .report-hero-plus{
+    right:22px;bottom:3px;
+    width:42px;height:42px;
+    font-size:24px;
+    background:linear-gradient(135deg,#f4c351,#b57912);
+}
+
+/* FLOW / STEPPER */
+#new-report .report-flow{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:10px;
+    margin-bottom:16px;
+}
+#new-report .report-flow-step{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:11px;
+    min-height:64px;
+    padding:12px 14px;
+    border:1px solid var(--rp-line);
+    border-radius:13px;
+    background:linear-gradient(145deg,rgba(10,22,37,.82),rgba(6,15,26,.78));
+}
+#new-report .report-flow-step:not(:last-child):after{
+    content:"";
+    position:absolute;
+    width:10px;height:1px;
+    right:-11px;top:50%;
+    background:rgba(240,185,61,.28);
+}
+#new-report .report-flow-num{
+    flex:0 0 34px;
+    width:34px;height:34px;
+    display:grid;place-items:center;
+    border-radius:10px;
+    color:#eeb640;
+    border:1px solid rgba(240,185,61,.20);
+    background:rgba(240,185,61,.065);
+    font-size:10px;font-weight:950;
+}
+#new-report .report-flow-step:first-child{
+    border-color:rgba(240,185,61,.24);
+    background:linear-gradient(145deg,rgba(240,185,61,.07),rgba(7,17,29,.82));
+}
+#new-report .report-flow-copy small{
+    display:block;
+    margin-bottom:3px;
+    color:#5f7289;
+    font-size:7px;
+    font-weight:900;
+    letter-spacing:.8px;
+}
+#new-report .report-flow-copy strong{
+    display:block;
+    color:#cbd5e1;
+    font-size:9px;
+    font-weight:900;
+}
+
+/* FORM */
+#new-report .report-premium-form{
+    gap:12px;
+    padding:18px;
+    border:1px solid rgba(103,137,178,.14);
+    border-radius:20px;
+    background:linear-gradient(145deg,rgba(7,17,29,.84),rgba(4,12,21,.76));
+    box-shadow:0 22px 60px rgba(0,0,0,.18);
+}
+#new-report .report-field-card{
+    grid-template-columns:50px minmax(0,1fr);
+    gap:15px;
+    padding:15px;
+    border:1px solid rgba(105,137,175,.12);
+    border-radius:14px;
+    background:rgba(10,22,37,.58);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.018);
+}
+#new-report .report-field-card:hover{
+    border-color:rgba(105,145,195,.20);
+    background:rgba(11,25,42,.68);
+}
+#new-report .report-field-card:focus-within{
+    border-color:rgba(240,185,61,.34);
+    box-shadow:0 0 0 3px rgba(240,185,61,.035);
+}
+#new-report .report-field-icon{
+    width:44px;height:44px;
+    border-radius:11px;
+    font-size:19px;
+    color:#f0b93d;
+    border-color:rgba(240,185,61,.19);
+    background:rgba(240,185,61,.06);
+}
+#new-report .report-field-body label{
+    margin-bottom:7px;
+    color:#71849a;
+    font-size:8px;
+    letter-spacing:1px;
+}
+#new-report .report-field-body input[type="text"],
+#new-report .report-field-body select{
+    height:48px!important;
+    border-radius:10px!important;
+    border-color:rgba(113,145,182,.15)!important;
+    background:rgba(2,9,17,.52)!important;
+}
+#new-report .report-field-body input[type="text"]:focus,
+#new-report .report-field-body select:focus{
+    border-color:rgba(240,185,61,.36)!important;
+    box-shadow:0 0 0 3px rgba(240,185,61,.035)!important;
+}
+
+/* REPORT TYPE */
+#new-report .report-type-trigger{
+    min-height:62px;
+    border-radius:12px!important;
+    border:1px solid rgba(112,145,184,.16)!important;
+    background:linear-gradient(145deg,rgba(3,12,22,.72),rgba(7,18,31,.76))!important;
+    transition:.18s ease;
+}
+#new-report .report-type-trigger:hover{
+    border-color:rgba(240,185,61,.28)!important;
+    transform:translateY(-1px);
+}
+#new-report .report-type-trigger-icon{
+    border-radius:10px!important;
+    color:#f0b93d!important;
+    background:rgba(240,185,61,.07)!important;
+    border-color:rgba(240,185,61,.18)!important;
+}
+#new-report .report-type-menu{
+    margin-top:9px!important;
+    padding:15px!important;
+    border:1px solid rgba(240,185,61,.18)!important;
+    border-radius:15px!important;
+    background:
+        radial-gradient(circle at 100% 0,rgba(240,185,61,.06),transparent 30%),
+        rgba(5,14,24,.985)!important;
+    box-shadow:0 24px 65px rgba(0,0,0,.42)!important;
+}
+#new-report .report-type-menu-head{
+    padding:2px 3px 13px!important;
+    border-bottom:1px solid rgba(255,255,255,.05);
+    margin-bottom:11px;
+}
+#new-report .report-type-options{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:8px!important;
+}
+#new-report .report-type-option{
+    min-height:76px!important;
+    padding:12px!important;
+    border:1px solid rgba(111,143,180,.12)!important;
+    border-radius:11px!important;
+    background:rgba(12,25,41,.56)!important;
+    transition:.18s ease!important;
+}
+#new-report .report-type-option:hover{
+    transform:translateY(-2px);
+    border-color:rgba(240,185,61,.26)!important;
+    background:linear-gradient(145deg,rgba(240,185,61,.07),rgba(12,25,41,.76))!important;
+    box-shadow:0 10px 25px rgba(0,0,0,.16);
+}
+#new-report .report-type-option.selected{
+    border-color:rgba(240,185,61,.38)!important;
+    background:linear-gradient(145deg,rgba(240,185,61,.11),rgba(12,25,41,.82))!important;
+}
+#new-report .report-type-option-icon{
+    width:36px!important;height:36px!important;
+    border-radius:9px!important;
+    color:#efb63c!important;
+    background:rgba(240,185,61,.06)!important;
+}
+#new-report .report-type-option-copy strong{font-size:9px!important;letter-spacing:.15px}
+#new-report .report-type-option-copy small{margin-top:4px!important;color:#62758c!important;font-size:7px!important;line-height:1.35}
+
+/* SPECIAL FIELDS */
+#new-report .report-special-fields{
+    border-radius:15px;
+}
+#new-report .report-special-group{
+    padding:20px!important;
+    border:1px solid rgba(240,185,61,.15)!important;
+    border-radius:14px!important;
+    background:linear-gradient(145deg,rgba(240,185,61,.035),rgba(8,20,34,.72))!important;
+}
+#new-report .report-special-group h3{
+    margin-top:0!important;
+    color:#f0b93d!important;
+    letter-spacing:.7px;
+}
+
+/* UPLOAD */
+#new-report .report-dropzone{
+    min-height:190px;
+    border:1px dashed rgba(111,145,184,.32);
+    border-radius:12px;
+    background:
+        radial-gradient(circle at 50% 40%,rgba(59,140,255,.035),transparent 36%),
+        rgba(2,10,18,.40);
+}
+#new-report .report-dropzone:hover,
+#new-report .report-dropzone.dragging{
+    border-color:rgba(240,185,61,.48);
+    background:rgba(240,185,61,.035);
+}
+#new-report .report-upload-symbol{
+    width:52px;height:52px;
+    border-radius:14px;
+    background:rgba(240,185,61,.06);
+}
+#new-report .report-dropzone strong{font-size:13px}
+#new-report .report-dropzone>span{font-size:9px}
+
+/* FOOTER */
+#new-report .report-form-footer{
+    margin-top:3px;
+    padding:17px 2px 1px;
+}
+#new-report .report-form-note{
+    display:flex;align-items:center;gap:7px;
+    color:#667a91;
+    font-size:9px;
+}
+#new-report .report-submit-btn{
+    min-width:220px!important;
+    height:48px!important;
+    border-radius:10px!important;
+    background:linear-gradient(135deg,#efb83c,#a76f11)!important;
+    box-shadow:0 12px 28px rgba(167,111,17,.17)!important;
+}
+#new-report .report-submit-btn:hover{
+    box-shadow:0 15px 36px rgba(195,135,26,.26)!important;
+}
+
+/* Organizer gets same premium visual language */
+#new-report .report-organizer-card{
+    border-color:rgba(59,140,255,.16);
+}
+#new-report .report-organizer-main-icon{
+    color:#6fa9ff;
+    border-color:rgba(59,140,255,.20);
+    background:rgba(59,140,255,.06);
+}
+
+@media(max-width:1100px){
+    #new-report .report-type-options{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    #new-report .report-flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+    #new-report .report-flow-step:nth-child(2):after{display:none}
+}
+@media(max-width:700px){
+    #new-report .report-premium-hero{padding:24px 20px;min-height:auto}
+    #new-report .report-premium-hero h2{font-size:32px}
+    #new-report .report-hero-art{display:none}
+    #new-report .report-flow{grid-template-columns:1fr}
+    #new-report .report-flow-step:after{display:none!important}
+    #new-report .report-premium-form{padding:12px}
+    #new-report .report-field-card{grid-template-columns:1fr}
+    #new-report .report-field-icon{display:none}
+    #new-report .report-type-options{grid-template-columns:1fr!important}
+    #new-report .report-form-footer{flex-direction:column;align-items:stretch}
+    #new-report .report-submit-btn{width:100%}
+}
+
 </style>
 
 <style id="sanction-premium-styles">
@@ -12212,6 +12570,26 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                         </div>
                     </div>
 
+                    
+                    <div class="report-flow" aria-label="Pașii raportului">
+                        <div class="report-flow-step">
+                            <span class="report-flow-num">01</span>
+                            <span class="report-flow-copy"><small>PASUL 1</small><strong>Alege tipul</strong></span>
+                        </div>
+                        <div class="report-flow-step">
+                            <span class="report-flow-num">02</span>
+                            <span class="report-flow-copy"><small>PASUL 2</small><strong>Completează datele</strong></span>
+                        </div>
+                        <div class="report-flow-step">
+                            <span class="report-flow-num">03</span>
+                            <span class="report-flow-copy"><small>PASUL 3</small><strong>Încarcă dovezile</strong></span>
+                        </div>
+                        <div class="report-flow-step">
+                            <span class="report-flow-num">04</span>
+                            <span class="report-flow-copy"><small>PASUL 4</small><strong>Verifică și postează</strong></span>
+                        </div>
+                    </div>
+
                     <form id="report-form" enctype="multipart/form-data" class="report-premium-form">
                         <div class="report-field-card">
                             <div class="report-field-icon">▤</div>
@@ -12276,7 +12654,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
             <span class="report-type-option-icon">⌘</span>
             <span class="report-type-option-copy">
                 <strong>REGRUPARE</strong>
-                <small>Activitate de regrupare DIICOT</small>
+                <small>Activitate de regrupare POLIȚIA ROMÂNĂ</small>
             </span>
             <span class="report-type-option-check">✓</span>
         </button>
