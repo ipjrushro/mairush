@@ -12001,6 +12001,47 @@ body:after{
   .transfer-modal-root .transfer-modal-card{margin:10px auto !important;padding:17px !important;max-height:calc(100vh - 20px) !important}
 }
 
+
+
+/* POLITIE TRANSFER CARD — vizibil în primul rând */
+#activities #open-transfer-modal.transfer-police-card{
+    position:relative!important;
+    display:flex!important;
+    flex-direction:column!important;
+    min-height:185px!important;
+    opacity:1!important;
+    visibility:visible!important;
+    overflow:hidden!important;
+    border:1px solid rgba(74,158,242,.34)!important;
+    background:
+      radial-gradient(circle at 100% 0,rgba(50,144,235,.16),transparent 40%),
+      linear-gradient(145deg,rgba(8,27,45,.98),rgba(5,16,28,.98))!important;
+    box-shadow:0 13px 32px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.025)!important;
+}
+#activities #open-transfer-modal.transfer-police-card:before{
+    content:"TRANSFER";
+    position:absolute;right:14px;top:13px;
+    padding:4px 7px;border-radius:999px;
+    border:1px solid rgba(66,161,255,.24);
+    background:rgba(48,139,228,.09);
+    color:#66b9ff;font-size:6px;font-weight:950;letter-spacing:1px;
+}
+#activities #open-transfer-modal.transfer-police-card:hover{
+    transform:translateY(-4px)!important;
+    border-color:rgba(79,174,255,.62)!important;
+    box-shadow:0 18px 42px rgba(0,0,0,.28),0 0 28px rgba(46,139,226,.07)!important;
+}
+.transfer-police-icon{color:#69baff!important}
+.transfer-card-status{
+    display:flex;align-items:center;gap:6px;margin-top:auto;padding-top:13px;
+    color:#7690aa;font-size:7px;font-weight:950;letter-spacing:.7px
+}
+.transfer-card-status span{
+    padding:4px 6px;border-radius:6px;border:1px solid rgba(103,154,205,.13);
+    background:rgba(255,255,255,.02)
+}
+.transfer-card-status b{color:#e7b644}
+
 </style>
 
 </head>
@@ -12502,6 +12543,24 @@ body:after{
 
                         <button
                             type="button"
+                            class="home-action-card transfer-police-card"
+                            id="open-transfer-modal"
+                        >
+                            <div class="home-action-icon transfer-police-icon">⇄</div>
+                            <h3>TRANSFER CĂTRE DIICOT</h3>
+                            <p>
+                                Solicită transferul din POLIȚIA ROMÂNĂ în DIICOT.
+                                Cererea necesită aprobarea ambelor conduceri.
+                            </p>
+                            <div class="transfer-card-status">
+                                <span>POLIȚIE</span><b>+</b><span>DIICOT</span>
+                            </div>
+                            <span class="home-action-arrow">→</span>
+                        </button>
+
+
+                        <button
+                            type="button"
                             class="home-action-card"
                             data-home-section="my-reports"
                         >
@@ -12621,17 +12680,6 @@ body:after{
                             <p>
                                 Sub Comisar+ poate aplica Faction Warn (maximum 5)
                                 sau OUT unui membru, cu motiv obligatoriu.
-                            </p>
-                            <span class="home-action-arrow">→</span>
-                        </button>
-
-
-                        <button type="button" class="home-action-card purple" id="open-transfer-modal">
-                            <div class="home-action-icon">⇄</div>
-                            <h3>TRANSFER CĂTRE DIICOT</h3>
-                            <p>
-                                Trimite o cerere de transfer. Este necesară aprobarea
-                                Conducerii Poliției și a Conducerii DIICOT.
                             </p>
                             <span class="home-action-arrow">→</span>
                         </button>
