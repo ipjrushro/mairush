@@ -15300,8 +15300,10 @@ function canApproveDiicotTransfer(user) {
     return [...TRANSFER_DIICOT_LEADERSHIP_IDS].some(id => roles.has(id));
 }
 
-async function loadTransferState() {
-    if (transferStateLoaded) return transferState;
+async function loadTransferState({ force = false } = {}) {
+    // Registrul este comun cu site-ul DIICOT. Nu păstrăm o copie veche
+    // între request-uri, altfel modificările făcute pe celălalt site nu apar.
+    if (transferStateLoaded && !force) return transferState;
     transferStateLoaded = true;
 
     if (!meetingAttendanceB2Ready()) {
@@ -15340,8 +15342,9 @@ async function saveTransferState() {
 function publicTransferRequest(row, user) {
     return {
         ...row,
+        // Acesta este backend-ul site-ului POLIȚIEI: poate decide doar Poliția.
         canDecidePolice: canApprovePoliceTransfer(user),
-        canDecideDiicot: canApproveDiicotTransfer(user)
+        canDecideDiicot: false
     };
 }
 
@@ -15380,17 +15383,19 @@ async function transferDiscordRoles(request) {
 
 app.get("/api/transfers", requireAuth, async (req, res) => {
     try {
-        await loadTransferState();
+        await loadTransferState({ force: true });
 
         const user = req.session.user;
         const userId = String(user.id || "");
         const policeLeadership = canApprovePoliceTransfer(user);
-        const diicotLeadership = canApproveDiicotTransfer(user);
+        // Pe site-ul Poliției nu acordăm drept de decizie DIICOT, chiar dacă
+        // utilizatorul are accidental și un rol DIICOT pe Discord.
+        const diicotLeadership = false;
 
         let requests = transferState.requests || [];
 
-        // Conducerea vede toate cererile, membrul vede doar cererile sale.
-        if (!policeLeadership && !diicotLeadership) {
+        // Conducerea Poliției vede registrul comun complet; membrul vede doar cererile sale.
+        if (!policeLeadership) {
             requests = requests.filter(row => String(row.userId) === userId);
         }
 
@@ -15424,7 +15429,7 @@ app.get("/api/transfers", requireAuth, async (req, res) => {
 
 app.post("/api/transfers", requireAuth, async (req, res) => {
     try {
-        await loadTransferState();
+        await loadTransferState({ force: true });
 
         const source = normalizeTransferDepartment(req.body?.source);
         const reason = String(req.body?.reason || "").trim();
@@ -15434,6 +15439,9 @@ app.post("/api/transfers", requireAuth, async (req, res) => {
         const roles = Array.isArray(user.roles) ? user.roles : [];
 
         if (!source) return res.status(400).json({ error: "Structura de origine este invalidă." });
+        if (source !== "POLITIE") {
+            return res.status(403).json({ error: "Pe site-ul Poliției poți trimite doar cereri POLIȚIE → DIICOT." });
+        }
         if (reason.length < 10) return res.status(400).json({ error: "Motivul transferului trebuie să aibă minimum 10 caractere." });
         if (!/^[0-9]{1,10}$/.test(gameId)) return res.status(400).json({ error: "Introdu un ID valid din joc." });
         if (!Number.isFinite(age) || age < 14 || age > 99) return res.status(400).json({ error: "Vârsta introdusă nu este validă." });
@@ -15506,7 +15514,7 @@ app.post("/api/transfers", requireAuth, async (req, res) => {
 
 app.post("/api/transfers/:id/decision", requireAuth, async (req, res) => {
     try {
-        await loadTransferState();
+        await loadTransferState({ force: true });
 
         const id = String(req.params.id || "");
         const department = normalizeTransferDepartment(req.body?.department);
@@ -15517,13 +15525,13 @@ app.post("/api/transfers/:id/decision", requireAuth, async (req, res) => {
             return res.status(400).json({ error: "Decizia este invalidă." });
         }
 
-        if (department === "POLITIE" && !canApprovePoliceTransfer(user)) {
+        if (!department) return res.status(400).json({ error: "Structura de aprobare este invalidă." });
+        if (department !== "POLITIE") {
+            return res.status(403).json({ error: "Decizia DIICOT poate fi dată doar de pe site-ul DIICOT." });
+        }
+        if (!canApprovePoliceTransfer(user)) {
             return res.status(403).json({ error: "Nu ai acces la aprobarea conducerii Poliției." });
         }
-        if (department === "DIICOT" && !canApproveDiicotTransfer(user)) {
-            return res.status(403).json({ error: "Nu ai acces la aprobarea conducerii DIICOT." });
-        }
-        if (!department) return res.status(400).json({ error: "Structura de aprobare este invalidă." });
 
         const request = transferState.requests.find(row => String(row.id) === id);
         if (!request) return res.status(404).json({ error: "Cererea nu a fost găsită." });
