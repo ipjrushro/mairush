@@ -11706,6 +11706,227 @@ html,body{background:
 .logo-fallback{display:none;color:#efb83e;font-size:10px;font-weight:950;line-height:1.15;text-align:center;letter-spacing:.8px}
 .police-mark-real.logo-missing .logo-fallback{display:block}
 
+
+
+/* =========================================================
+   POLITIA COMMAND OS — V11 CINEMATIC PREMIUM OVERHAUL
+========================================================= */
+:root{
+ --os-bg:#020811;--os-surface:#06121f;--os-surface2:#091a2a;
+ --os-border:rgba(116,159,202,.14);--os-border-hot:rgba(54,153,255,.34);
+ --os-blue:#389cff;--os-cyan:#62c6ff;--os-gold:#e8b13d;--os-green:#36d6a0;
+ --os-text:#edf6ff;--os-muted:#72869a;
+}
+body:before{
+ content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;
+ background:
+ radial-gradient(900px 500px at 75% -10%,rgba(29,107,184,.13),transparent 68%),
+ radial-gradient(700px 500px at 15% 100%,rgba(232,177,61,.045),transparent 68%),
+ linear-gradient(180deg,#030b14,#02070d);
+}
+body:after{
+ content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;
+ background-image:linear-gradient(rgba(255,255,255,.7) 1px,transparent 1px),
+ linear-gradient(90deg,rgba(255,255,255,.7) 1px,transparent 1px);
+ background-size:42px 42px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.5),transparent 80%)
+}
+
+/* SIDEBAR — real command console */
+.command-sidebar{
+ width:252px!important;margin:12px!important;height:calc(100vh - 24px)!important;
+ border-radius:20px!important;border:1px solid rgba(101,149,197,.16)!important;
+ background:linear-gradient(180deg,rgba(5,16,27,.98),rgba(2,9,16,.99))!important;
+ box-shadow:0 30px 90px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.025)!important;
+}
+.command-sidebar:after{
+ content:"";position:absolute;right:0;top:78px;bottom:78px;width:1px;
+ background:linear-gradient(transparent,rgba(232,177,61,.8),transparent);
+ box-shadow:0 0 14px rgba(232,177,61,.25)
+}
+.sidebar-brand{min-height:194px!important;padding:22px 18px!important}
+.police-mark-real{
+ width:88px!important;height:88px!important;margin:0 auto 9px!important;
+ background:radial-gradient(circle,rgba(56,156,255,.09),transparent 68%)!important
+}
+.police-real-logo{width:82px!important;height:82px!important;object-fit:contain!important;
+ filter:drop-shadow(0 9px 14px rgba(0,0,0,.45)) drop-shadow(0 0 15px rgba(56,156,255,.15))!important}
+.sidebar-brand>strong{font-size:17px!important;letter-spacing:1.45px!important}
+.sidebar-link{
+ position:relative!important;min-height:43px!important;margin:2px 0!important;border-radius:10px!important;
+ font-size:10px!important;letter-spacing:.15px!important
+}
+.sidebar-link.active{
+ background:linear-gradient(90deg,rgba(47,142,235,.19),rgba(47,142,235,.025))!important;
+ box-shadow:inset 3px 0 #4ba9ff,0 8px 25px rgba(0,0,0,.16)!important
+}
+.sidebar-link.active:after{
+ content:"";position:absolute;right:10px;width:5px;height:5px;border-radius:50%;
+ background:#52b4ff;box-shadow:0 0 10px #52b4ff
+}
+
+/* MAIN LAYOUT */
+.command-app{grid-template-columns:276px minmax(0,1fr)!important}
+.command-main{grid-column:2!important;padding-left:0!important;min-width:0!important}
+.command-topbar{
+ min-height:68px!important;margin:12px 16px 0 0!important;border-radius:15px!important;
+ background:rgba(5,16,27,.78)!important;border:1px solid rgba(104,151,199,.13)!important;
+ backdrop-filter:blur(22px) saturate(130%)!important;
+ box-shadow:0 14px 40px rgba(0,0,0,.18)!important
+}
+.dashboard-content{padding:15px 16px 35px 0!important}
+
+/* PAGE SECTIONS */
+.dashboard-section{position:relative}
+.dashboard-section>h1,.dashboard-section>h2{letter-spacing:-.6px!important}
+.home-section-shell,.v4-panel,.v5-panel,.profile-shell,.admin-shell,
+.report-shell,.reports-shell{
+ border:1px solid var(--os-border)!important;border-radius:19px!important;
+ background:linear-gradient(145deg,rgba(7,19,32,.92),rgba(3,11,20,.95))!important;
+ box-shadow:0 24px 65px rgba(0,0,0,.20),inset 0 1px rgba(255,255,255,.022)!important
+}
+
+/* UNIVERSAL CARDS */
+.dashboard-content [class*="card"]{
+ transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease!important
+}
+.dashboard-content [class*="card"]:hover{
+ border-color:rgba(68,155,244,.25)!important;
+ box-shadow:0 15px 36px rgba(0,0,0,.16)!important
+}
+
+/* HOME / PREZENTARE GENERALA */
+#overview .home-hero{
+ position:relative!important;overflow:hidden!important;border-radius:20px!important;
+ border:1px solid rgba(105,151,197,.15)!important;
+ background:
+ radial-gradient(650px 330px at 88% 20%,rgba(43,126,208,.13),transparent 70%),
+ linear-gradient(120deg,rgba(5,17,29,.98),rgba(8,24,39,.94))!important
+}
+#overview .home-hero:after{
+ content:"IPJ // COMMAND";position:absolute;right:25px;bottom:-5px;
+ font-size:42px;font-weight:950;letter-spacing:5px;color:rgba(255,255,255,.018);pointer-events:none
+}
+#overview .home-stat-card{
+ border-radius:15px!important;border:1px solid var(--os-border)!important;
+ background:linear-gradient(145deg,rgba(9,24,39,.88),rgba(5,15,25,.9))!important
+}
+#overview .home-panel{
+ border-radius:17px!important;border:1px solid var(--os-border)!important;
+ background:rgba(5,16,27,.76)!important
+}
+
+/* ACTIVITIES — fully different command tiles */
+#activities .home-launcher{
+ padding:26px!important;border-radius:21px!important;border:1px solid var(--os-border)!important;
+ background:
+ radial-gradient(700px 260px at 100% 0,rgba(56,156,255,.08),transparent 70%),
+ linear-gradient(145deg,rgba(7,19,32,.96),rgba(3,11,20,.97))!important
+}
+#activities .home-actions-grid{
+ display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important
+}
+#activities .home-action-card{
+ min-height:185px!important;padding:18px!important;border-radius:15px!important;
+ border:1px solid rgba(109,154,199,.13)!important;
+ background:linear-gradient(160deg,rgba(10,26,42,.9),rgba(4,14,24,.96))!important;
+ box-shadow:inset 0 1px rgba(255,255,255,.02)!important;overflow:hidden!important
+}
+#activities .home-action-card:hover{
+ transform:translateY(-4px)!important;border-color:rgba(62,157,255,.34)!important;
+ box-shadow:0 18px 40px rgba(0,0,0,.26),0 0 0 1px rgba(62,157,255,.04)!important
+}
+#activities .home-action-card:after{
+ content:"";position:absolute;right:-42px;top:-42px;width:105px;height:105px;border-radius:50%;
+ border:1px solid rgba(100,163,224,.08);box-shadow:0 0 0 18px rgba(100,163,224,.015)
+}
+#activities .home-action-icon{
+ width:45px!important;height:45px!important;border-radius:11px!important;margin-bottom:26px!important;
+ background:rgba(56,156,255,.07)!important;border:1px solid rgba(56,156,255,.17)!important
+}
+
+/* REPORT NEW — operational form */
+#new-report .report-new-shell,#new-report .v4-panel,#new-report .report-shell{
+ position:relative;overflow:hidden;border-radius:20px!important
+}
+#new-report input,#new-report textarea,#new-report select{
+ background:rgba(2,9,16,.7)!important;border:1px solid rgba(112,158,204,.15)!important;
+ box-shadow:inset 0 1px 2px rgba(0,0,0,.3)!important
+}
+#new-report input:focus,#new-report textarea:focus,#new-report select:focus{
+ border-color:rgba(56,156,255,.52)!important;box-shadow:0 0 0 3px rgba(56,156,255,.06)!important
+}
+
+/* REPORTS / PERSONNEL / ADMIN TABLES */
+#my-reports table,#personnel table,#leadership table,#blacklist table,#admin table{
+ border-collapse:separate!important;border-spacing:0 7px!important
+}
+#my-reports tbody tr,#personnel tbody tr,#leadership tbody tr,#blacklist tbody tr,#admin tbody tr{
+ background:linear-gradient(90deg,rgba(8,22,36,.86),rgba(5,15,25,.86))!important;
+ transition:.17s ease!important
+}
+#my-reports tbody tr:hover,#personnel tbody tr:hover,#leadership tbody tr:hover,#blacklist tbody tr:hover,#admin tbody tr:hover{
+ transform:translateX(2px);background:rgba(10,29,47,.95)!important
+}
+
+/* DOCS + PENAL CODE + GUIDE: institutional reading surface */
+#docs .v4-panel,#penal-code .v4-panel,#guide .v4-panel,#general-guide .v4-panel{
+ background:linear-gradient(145deg,rgba(8,21,34,.95),rgba(4,13,22,.97))!important;
+ border-radius:18px!important
+}
+#docs h2,#penal-code h2,#guide h2,#general-guide h2{color:#f2f7fb!important}
+#docs h3,#penal-code h3,#guide h3,#general-guide h3{color:#e8b13d!important}
+
+/* PROFILE — digital personnel file */
+#profile .profile-shell{
+ position:relative!important;overflow:hidden!important;
+ background:
+ radial-gradient(550px 250px at 90% 10%,rgba(56,156,255,.08),transparent 70%),
+ linear-gradient(145deg,rgba(7,19,32,.97),rgba(3,11,20,.98))!important
+}
+#profile .profile-shell:after{
+ content:"DOSAR OPERAȚIONAL";position:absolute;right:28px;bottom:12px;
+ font-size:30px;font-weight:950;letter-spacing:4px;color:rgba(255,255,255,.018);pointer-events:none
+}
+
+/* PREMIUM CONTROLS */
+.dashboard-content button:not(.sidebar-link):not(.guide-tab){
+ border-radius:9px!important;font-weight:850!important;letter-spacing:.15px!important
+}
+.dashboard-content button:not(.sidebar-link):not(.guide-tab):hover{
+ transform:translateY(-2px)!important;filter:brightness(1.07)
+}
+.dashboard-content input,.dashboard-content textarea,.dashboard-content select{
+ border-radius:10px!important;transition:border-color .16s ease,box-shadow .16s ease!important
+}
+
+/* STATUS / tiny HUD details */
+.dashboard-content [class*="status"],.dashboard-content [class*="badge"]{
+ letter-spacing:.45px!important
+}
+
+/* page entry */
+.dashboard-section.active{animation:osPageIn .32s cubic-bezier(.2,.75,.25,1)}
+@keyframes osPageIn{
+ from{opacity:0;transform:translateY(8px);filter:blur(2px)}
+ to{opacity:1;transform:none;filter:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .dashboard-section.active{animation:none}.dashboard-content [class*="card"]{transition:none!important}
+}
+
+/* responsive */
+@media(max-width:1450px){#activities .home-actions-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:1120px){#activities .home-actions-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:980px){
+ .command-app{grid-template-columns:96px minmax(0,1fr)!important}
+ .command-sidebar{width:76px!important}.command-main{grid-column:2!important}
+}
+@media(max-width:680px){
+ .command-app{display:block!important}.command-sidebar{display:none!important}
+ .command-main{width:100%!important}.dashboard-content{padding:8px!important}
+ #activities .home-actions-grid{grid-template-columns:1fr!important}
+}
+
 </style>
 
 </head>
@@ -11728,7 +11949,7 @@ html,body{background:
 
 
             <div class="police-mark police-mark-real" aria-label="Poliția Română">
-                <img class="police-real-logo" src="/politia-romana-logo.png" alt="" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'logo-missing\')"><span class="logo-fallback" aria-hidden="true">POLIȚIA<br>ROMÂNĂ</span>
+                <img class="police-real-logo" src="/uploads/politia-romana-logo.png" alt="Poliția Română" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src=\'uploads/politia-romana-logo.png\'}else{this.style.display=\'none\';this.parentElement.classList.add(\'logo-missing\')}"><span class="logo-fallback" aria-hidden="true">POLIȚIA<br>ROMÂNĂ</span>
             </div>
 
 
@@ -33747,6 +33968,18 @@ document.addEventListener("click", function(event) {
     document.querySelectorAll("[data-guide-panel]").forEach(panel => {
         panel.classList.toggle("active", panel.getAttribute("data-guide-panel") === name);
     });
+});
+</script>
+
+
+<script>
+document.addEventListener('click', function(e){
+  const b=e.target.closest('[data-section]');
+  if(!b) return;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const s=document.querySelector('.dashboard-section.active');
+    if(s){s.style.animation='none'; void s.offsetWidth; s.style.animation='';}
+  }));
 });
 </script>
 
