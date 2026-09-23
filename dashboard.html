@@ -11492,7 +11492,7 @@ html,body{background:
 
 /* Activities */
 #activities .home-section-shell{padding:20px!important}
-#activities .home-action-grid{
+#activities .home-actions-grid{
   display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:11px!important
 }
 #activities .home-action-card{
@@ -11542,7 +11542,7 @@ html,body{background:
 
 /* Responsive */
 @media(max-width:1250px){
-  #activities .home-action-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #activities .home-actions-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 }
 @media(max-width:980px){
   .command-sidebar{width:82px!important}
@@ -11551,13 +11551,160 @@ html,body{background:
   .sidebar-brand{min-height:108px!important;padding:17px 6px!important}
   .police-mark-real{width:58px!important;height:58px!important}.police-real-logo{width:56px!important;height:56px!important}
   .sidebar-link{justify-content:center!important;padding:0!important}.nav-real-icon{width:22px;height:22px;flex-basis:22px}.nav-real-icon svg{width:19px;height:19px}
-  #activities .home-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #activities .home-actions-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
 @media(max-width:650px){
   .command-sidebar{display:none!important}.command-main{padding-left:0!important}
   .command-topbar{margin:8px!important}.dashboard-content{padding:8px!important}
-  #activities .home-action-grid{grid-template-columns:1fr!important}
+  #activities .home-actions-grid{grid-template-columns:1fr!important}
 }
+
+
+
+/* =========================================================
+   V10.1 LAYOUT + ACTIVITATI FIX
+========================================================= */
+
+/* The app already reserves the sidebar column. Do NOT offset main a second time. */
+.command-app{
+  grid-template-columns:260px minmax(0,1fr)!important;
+  gap:0!important;
+}
+.command-main{
+  grid-column:2!important;
+  padding-left:0!important;
+  width:auto!important;
+  min-width:0!important;
+}
+.command-topbar{
+  width:auto!important;
+  margin:14px 18px 0 14px!important;
+}
+.dashboard-content{
+  width:auto!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:18px 18px 34px 14px!important;
+}
+
+/* ACTIVITATI — actual classes used by this dashboard */
+#activities .home-launcher{
+  position:relative!important;
+  overflow:hidden!important;
+  padding:26px!important;
+  border:1px solid rgba(111,151,194,.14)!important;
+  border-radius:22px!important;
+  background:
+    radial-gradient(circle at 88% 0,rgba(47,140,255,.08),transparent 29%),
+    radial-gradient(circle at 12% 100%,rgba(239,184,62,.045),transparent 25%),
+    linear-gradient(145deg,rgba(7,18,30,.95),rgba(3,11,19,.97))!important;
+  box-shadow:0 25px 65px rgba(0,0,0,.23),inset 0 1px rgba(255,255,255,.025)!important;
+}
+#activities .home-launcher:before{
+  content:"";position:absolute;left:0;top:0;width:100%;height:2px;
+  background:linear-gradient(90deg,transparent,#2f8cff 28%,#efb83e 70%,transparent);
+  opacity:.55
+}
+#activities .home-launcher-head{
+  display:flex!important;align-items:flex-end!important;justify-content:space-between!important;
+  gap:25px!important;margin-bottom:22px!important;padding:0 2px 20px!important;
+  border-bottom:1px solid rgba(111,151,194,.1)!important
+}
+#activities .home-launcher-kicker{
+  display:inline-flex!important;align-items:center!important;gap:8px!important;
+  color:#efb83e!important;font-size:8px!important;font-weight:900!important;
+  letter-spacing:2px!important;margin-bottom:8px!important
+}
+#activities .home-launcher-kicker:before{
+  content:"";width:7px;height:7px;border-radius:50%;background:#35d79b;
+  box-shadow:0 0 12px rgba(53,215,155,.55)
+}
+#activities .home-launcher-head h2{
+  margin:0!important;color:#f3f7fb!important;font-size:30px!important;line-height:1!important;
+  letter-spacing:-.8px!important
+}
+#activities .home-launcher-head p{
+  max-width:500px!important;margin:0!important;text-align:right!important;
+  color:#70859a!important;font-size:10px!important;line-height:1.65!important
+}
+#activities .home-actions-grid{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:13px!important;
+}
+#activities .home-action-card{
+  position:relative!important;min-height:194px!important;padding:19px!important;
+  border:1px solid rgba(111,151,194,.13)!important;border-radius:17px!important;
+  background:
+    linear-gradient(180deg,rgba(10,25,40,.78),rgba(5,15,25,.92))!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.02),0 12px 28px rgba(0,0,0,.12)!important;
+  overflow:hidden!important;transition:.2s ease!important
+}
+#activities .home-action-card:before{
+  content:"";position:absolute!important;left:0!important;top:0!important;bottom:0!important;width:2px!important;
+  background:#2f8cff!important;opacity:.5!important
+}
+#activities .home-action-card.green:before{background:#35d79b!important}
+#activities .home-action-card.red:before{background:#ff6575!important}
+#activities .home-action-card.gold:before{background:#efb83e!important}
+#activities .home-action-card.purple:before{background:#9d79ff!important}
+#activities .home-action-card:hover{
+  transform:translateY(-4px)!important;border-color:rgba(69,160,255,.3)!important;
+  background:linear-gradient(180deg,rgba(13,31,49,.92),rgba(6,17,28,.98))!important;
+  box-shadow:0 18px 38px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.025)!important
+}
+#activities .home-action-card::after{
+  content:"";position:absolute;width:118px;height:118px;right:-52px;top:-52px;border-radius:50%;
+  border:1px solid rgba(97,151,206,.065)!important;background:rgba(47,140,255,.018)!important
+}
+#activities .home-action-icon{
+  width:45px!important;height:45px!important;margin:0 0 26px!important;border-radius:12px!important;
+  display:grid!important;place-items:center!important;font-size:16px!important;font-weight:900!important;
+  color:#69b6ff!important;background:rgba(47,140,255,.075)!important;
+  border:1px solid rgba(75,158,245,.17)!important;box-shadow:inset 0 1px rgba(255,255,255,.025)!important
+}
+#activities .green .home-action-icon{color:#51d9ac!important;background:rgba(53,215,155,.07)!important;border-color:rgba(53,215,155,.16)!important}
+#activities .red .home-action-icon{color:#ff7887!important;background:rgba(255,101,117,.07)!important;border-color:rgba(255,101,117,.16)!important}
+#activities .gold .home-action-icon{color:#efb83e!important;background:rgba(239,184,62,.07)!important;border-color:rgba(239,184,62,.17)!important}
+#activities .purple .home-action-icon{color:#a98bff!important;background:rgba(157,121,255,.07)!important;border-color:rgba(157,121,255,.17)!important}
+#activities .home-action-card h3{
+  margin:0 0 8px!important;color:#edf4fa!important;font-size:11px!important;font-weight:950!important;
+  letter-spacing:.12px!important
+}
+#activities .home-action-card p{
+  margin:0!important;padding-right:8px!important;color:#71869b!important;font-size:9px!important;
+  line-height:1.65!important
+}
+#activities .home-action-arrow{
+  position:absolute!important;right:17px!important;bottom:15px!important;
+  color:#efb83e!important;font-size:14px!important;opacity:.85!important
+}
+
+/* Fix remaining old DIICOT copy visually if HTML text was not replaced elsewhere */
+#activities .home-action-card{isolation:isolate}
+
+/* Better scaling */
+@media(max-width:1450px){
+  #activities .home-actions-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:1120px){
+  #activities .home-actions-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:980px){
+  .command-app{grid-template-columns:94px minmax(0,1fr)!important}
+  .command-main{padding-left:0!important}
+}
+@media(max-width:680px){
+  .command-app{display:block!important}
+  .command-main{width:100%!important}
+  #activities .home-launcher{padding:17px!important}
+  #activities .home-launcher-head{align-items:flex-start!important;flex-direction:column!important}
+  #activities .home-launcher-head p{text-align:left!important}
+  #activities .home-actions-grid{grid-template-columns:1fr!important}
+}
+
+.logo-fallback{display:none;color:#efb83e;font-size:10px;font-weight:950;line-height:1.15;text-align:center;letter-spacing:.8px}
+.police-mark-real.logo-missing .logo-fallback{display:block}
 
 </style>
 
@@ -11581,7 +11728,7 @@ html,body{background:
 
 
             <div class="police-mark police-mark-real" aria-label="Poliția Română">
-                <img class="police-real-logo" src="/politia-romana-logo.png" alt="Poliția Română">
+                <img class="police-real-logo" src="/politia-romana-logo.png" alt="" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'logo-missing\')"><span class="logo-fallback" aria-hidden="true">POLIȚIA<br>ROMÂNĂ</span>
             </div>
 
 
@@ -12109,7 +12256,7 @@ html,body{background:
                             <h3>CERERE CALLSIGN</h3>
                             <p>
                                 Trimite către conducere o cerere pentru acordarea
-                                unui callsign DIICOT.
+                                unui callsign POLIȚIA ROMÂNĂ.
                             </p>
                             <span class="home-action-arrow">→</span>
                         </button>
@@ -12136,7 +12283,7 @@ html,body{background:
                             <div class="home-action-icon">✓</div>
                             <h3>TESTARE CANDIDAȚI</h3>
                             <p>
-                                Gestionare teste pentru Conducere și Tester DIICOT.
+                                Gestionare teste pentru Conducere și Tester POLIȚIA ROMÂNĂ.
                             </p>
                             <span class="home-action-arrow">→</span>
                         </button>
