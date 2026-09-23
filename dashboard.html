@@ -11386,6 +11386,179 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
 @media(max-width:760px){
     #sanction-modal .sanction-active-item{grid-template-columns:1fr}
 }
+
+
+/* =========================================================
+   COMMAND CENTER V10 — FULL PREMIUM DASHBOARD
+   Keeps all existing application logic intact.
+========================================================= */
+:root{
+  --v10-bg:#030b14;--v10-panel:#071421;--v10-panel2:#0a1a2a;
+  --v10-line:rgba(111,151,194,.14);--v10-blue:#2f8cff;
+  --v10-gold:#efb83e;--v10-text:#eef5fb;--v10-muted:#71869d;
+}
+html,body{background:
+ radial-gradient(circle at 74% 0,rgba(28,101,174,.075),transparent 30%),
+ linear-gradient(180deg,#030b14 0%,#020810 100%)!important}
+.command-app{background:transparent!important}
+.command-sidebar{
+  width:248px!important;
+  margin:14px 0 14px 14px!important;
+  height:calc(100vh - 28px)!important;
+  border:1px solid rgba(111,151,194,.14)!important;
+  border-radius:22px!important;
+  background:
+   linear-gradient(180deg,rgba(5,15,25,.97),rgba(3,10,18,.985))!important;
+  box-shadow:0 28px 70px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.025)!important;
+  overflow:hidden auto!important;
+}
+.command-sidebar:before{
+  content:"";position:absolute;left:0;top:112px;bottom:112px;width:2px;
+  background:linear-gradient(transparent,rgba(239,184,62,.7),transparent);
+  box-shadow:0 0 18px rgba(239,184,62,.3)
+}
+.sidebar-brand{
+  min-height:185px!important;padding:22px 18px 20px!important;
+  border-bottom:1px solid rgba(255,255,255,.045)!important;
+  background:
+    radial-gradient(circle at 50% 20%,rgba(47,140,255,.08),transparent 42%)!important;
+}
+.police-mark-real{
+  width:76px!important;height:76px!important;margin:0 auto 12px!important;
+  display:grid!important;place-items:center!important;
+  border:0!important;background:transparent!important;
+}
+.police-real-logo{
+  width:72px!important;height:72px!important;object-fit:contain!important;
+  filter:drop-shadow(0 7px 16px rgba(0,0,0,.38)) drop-shadow(0 0 14px rgba(47,140,255,.14))!important;
+}
+.sidebar-brand>strong{font-size:18px!important;letter-spacing:1.2px!important;color:#f2bd47!important}
+.sidebar-brand .command-name{font-size:10px!important;letter-spacing:1.35px!important;color:#63b5ff!important}
+.department-name,.v5-brand-quote{display:none!important}
+.sidebar-group-title{padding:17px 22px 8px!important;font-size:8px!important;letter-spacing:2px!important;color:#536b84!important}
+.sidebar-nav{padding:0 10px!important;gap:4px!important}
+.sidebar-link{
+  min-height:44px!important;padding:0 13px!important;border-radius:11px!important;
+  display:flex!important;align-items:center!important;gap:12px!important;
+  color:#879aaf!important;font-size:10px!important;font-weight:850!important;letter-spacing:.12px!important;
+  border:1px solid transparent!important;background:transparent!important;
+  transition:.18s ease!important;
+}
+.sidebar-link:before{display:none!important}
+.sidebar-link:hover{
+  color:#dbe8f4!important;background:rgba(47,140,255,.055)!important;
+  border-color:rgba(91,149,211,.12)!important;transform:translateX(2px)
+}
+.sidebar-link.active{
+  color:#fff!important;border-color:rgba(69,160,255,.72)!important;
+  background:linear-gradient(90deg,rgba(47,140,255,.16),rgba(47,140,255,.035))!important;
+  box-shadow:inset 3px 0 #3a9cff,0 7px 22px rgba(0,0,0,.13)!important;
+}
+.nav-real-icon{
+  width:19px;height:19px;flex:0 0 19px;display:grid;place-items:center;
+  color:#7290ad;transition:.18s ease
+}
+.nav-real-icon svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sidebar-link.active .nav-real-icon{color:#5fb4ff;filter:drop-shadow(0 0 8px rgba(47,140,255,.35))}
+.nav-real-label{white-space:nowrap}
+.sidebar-admin-separator{height:1px!important;margin:13px 13px 2px!important;background:rgba(255,255,255,.05)!important}
+.sidebar-bottom{padding:0 10px 14px!important}
+.sidebar-security{margin:12px 4px 0!important;border-radius:12px!important;background:rgba(16,48,42,.25)!important}
+
+/* Main shell */
+.command-main{padding-left:276px!important;background:transparent!important}
+.command-topbar{
+  min-height:72px!important;margin:14px 18px 0 0!important;padding:0 14px!important;
+  border:1px solid rgba(111,151,194,.12)!important;border-radius:16px!important;
+  background:rgba(5,15,26,.74)!important;backdrop-filter:blur(18px)!important;
+  box-shadow:0 15px 40px rgba(0,0,0,.16)!important;
+}
+.dashboard-content{padding:18px 18px 30px 0!important;max-width:none!important}
+.dashboard-section{animation:v10fade .24s ease}
+@keyframes v10fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* Generic cards across the entire dashboard */
+.dashboard-content .card,
+.dashboard-content [class*="-card"],
+.dashboard-content [class*="-panel"]{
+  border-color:rgba(111,151,194,.13);
+}
+.home-section-shell,.v4-panel,.v5-panel,.profile-shell,.admin-shell{
+  border-radius:18px!important;
+  background:linear-gradient(145deg,rgba(7,18,30,.90),rgba(4,12,21,.90))!important;
+  border:1px solid rgba(111,151,194,.13)!important;
+  box-shadow:0 20px 55px rgba(0,0,0,.18)!important;
+}
+
+/* Activities */
+#activities .home-section-shell{padding:20px!important}
+#activities .home-action-grid{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:11px!important
+}
+#activities .home-action-card{
+  min-height:180px!important;padding:18px!important;border-radius:15px!important;
+  border:1px solid rgba(111,151,194,.13)!important;
+  background:
+   radial-gradient(circle at 100% 0,rgba(47,140,255,.04),transparent 32%),
+   linear-gradient(145deg,rgba(9,22,36,.86),rgba(5,14,24,.90))!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.018)!important;transition:.2s ease!important
+}
+#activities .home-action-card:hover{
+  transform:translateY(-3px)!important;border-color:rgba(74,157,245,.28)!important;
+  box-shadow:0 16px 36px rgba(0,0,0,.22)!important
+}
+#activities .home-action-icon{
+  width:44px!important;height:44px!important;border-radius:12px!important;
+  border:1px solid rgba(72,154,241,.18)!important;background:rgba(47,140,255,.065)!important;
+  display:grid!important;place-items:center!important;font-size:18px!important
+}
+#activities .home-action-card h3{font-size:11px!important;letter-spacing:.1px!important}
+#activities .home-action-card p{font-size:9px!important;line-height:1.6!important;color:#71869c!important}
+
+/* Forms, inputs, tables */
+.dashboard-content input,.dashboard-content select,.dashboard-content textarea{
+  border-radius:10px!important;border-color:rgba(111,151,194,.15)!important;
+  background:rgba(2,9,17,.52)!important;color:#dfe9f2!important
+}
+.dashboard-content input:focus,.dashboard-content select:focus,.dashboard-content textarea:focus{
+  border-color:rgba(47,140,255,.42)!important;box-shadow:0 0 0 3px rgba(47,140,255,.05)!important
+}
+.dashboard-content table{border-collapse:separate!important;border-spacing:0 6px!important}
+.dashboard-content thead th{color:#637991!important;font-size:8px!important;letter-spacing:1px!important}
+.dashboard-content tbody tr{background:rgba(8,20,33,.62)!important}
+.dashboard-content tbody td{border-top:1px solid rgba(111,151,194,.09)!important;border-bottom:1px solid rgba(111,151,194,.09)!important}
+
+/* Buttons */
+.dashboard-content button:not(.sidebar-link):not(.guide-tab){
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease
+}
+.dashboard-content button:not(.sidebar-link):hover{transform:translateY(-1px)}
+
+/* Scrollbar */
+*{scrollbar-width:thin;scrollbar-color:#8a6b25 rgba(255,255,255,.025)}
+::-webkit-scrollbar{width:7px;height:7px}
+::-webkit-scrollbar-track{background:rgba(255,255,255,.018)}
+::-webkit-scrollbar-thumb{background:linear-gradient(#a27a25,#5d491d);border-radius:20px}
+
+/* Responsive */
+@media(max-width:1250px){
+  #activities .home-action-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:980px){
+  .command-sidebar{width:82px!important}
+  .command-main{padding-left:108px!important}
+  .sidebar-brand>strong,.sidebar-brand .command-name,.sidebar-group-title,.nav-real-label,.sidebar-security,.sidebar-bottom .sidebar-group-title{display:none!important}
+  .sidebar-brand{min-height:108px!important;padding:17px 6px!important}
+  .police-mark-real{width:58px!important;height:58px!important}.police-real-logo{width:56px!important;height:56px!important}
+  .sidebar-link{justify-content:center!important;padding:0!important}.nav-real-icon{width:22px;height:22px;flex-basis:22px}.nav-real-icon svg{width:19px;height:19px}
+  #activities .home-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:650px){
+  .command-sidebar{display:none!important}.command-main{padding-left:0!important}
+  .command-topbar{margin:8px!important}.dashboard-content{padding:8px!important}
+  #activities .home-action-grid{grid-template-columns:1fr!important}
+}
+
 </style>
 
 </head>
@@ -11407,15 +11580,8 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
         <div class="sidebar-brand">
 
 
-            <div class="police-mark" aria-label="Poliția Română">
-                <svg class="police-emblem" viewBox="0 0 100 112" role="img" aria-label="Emblema Poliția Română">
-                    <path d="M50 3 91 17 84 78 50 108 16 78 9 17Z" fill="#073e88" stroke="#8fd2ff" stroke-width="3"/>
-                    <path d="M50 10 82 21 76 72 50 96 24 72 18 21Z" fill="#126bc1"/>
-                    <circle cx="50" cy="47" r="25" fill="#f5c542" stroke="#fff4bd" stroke-width="2"/>
-                    <path d="M50 23 56 39 73 40 60 51 64 68 50 58 36 68 40 51 27 40 44 39Z" fill="#073e88"/>
-                    <path d="M32 76h36" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
-                    <text x="50" y="87" text-anchor="middle" fill="#fff" font-size="10" font-weight="900" letter-spacing="1">POLIȚIA</text>
-                </svg>
+            <div class="police-mark police-mark-real" aria-label="Poliția Română">
+                <img class="police-real-logo" src="/politia-romana-logo.png" alt="Poliția Română">
             </div>
 
 
@@ -11454,7 +11620,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data-section="overview"
                 type="button"
             >
-                PREZENTARE GENERALĂ
+                <span class="nav-real-icon"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-6h5v6"/></svg></span><span class="nav-real-label">PREZENTARE GENERALĂ</span>
             </button>
 
                 <button
@@ -11462,8 +11628,8 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                     data-section="activities"
                     type="button"
                 >
-                    ACTIVITĂȚI
-                </button>
+                <span class="nav-real-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="11" cy="18" r="1.5"/></svg></span><span class="nav-real-label">ACTIVITĂȚI</span>
+            </button>
 
 
 
@@ -11473,7 +11639,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data-section="new-report"
                 type="button"
             >
-                RAPORT NOU
+                <span class="nav-real-icon"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 12h6M9 16h6M9 8h2"/></svg></span><span class="nav-real-label">RAPORT NOU</span>
             </button>
 
 
@@ -11483,7 +11649,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data-section="my-reports"
                 type="button"
             >
-                RAPOARTELE MELE
+                <span class="nav-real-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v15H4z"/><path d="M8 3h8v4H8zM8 11h8M8 15h5"/></svg></span><span class="nav-real-label">RAPOARTELE MELE</span>
             </button>
 
 
@@ -11493,7 +11659,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data-section="personnel"
                 type="button"
             >
-                PERSONAL POLIȚIE
+                <span class="nav-real-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M6 20c.6-4 2.5-6 6-6s5.4 2 6 6"/></svg></span><span class="nav-real-label">PERSONAL POLIȚIE</span>
             </button>
 
 
@@ -11503,7 +11669,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data-section="leave"
                 type="button"
             >
-                CONCEDII / ÎNVOIRI
+                <span class="nav-real-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16v14H4zM8 3v6M16 3v6M4 10h16"/><path d="m9 15 2 2 4-4"/></svg></span><span class="nav-real-label">CONCEDII / ÎNVOIRI</span>
             </button>
 
             <button
@@ -11511,7 +11677,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data-section="meeting-attendance"
                 type="button"
             >
-                PREZENȚĂ ȘEDINȚĂ
+                <span class="nav-real-icon"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h5"/><path d="m8 16 1.5 1.5L13 14"/></svg></span><span class="nav-real-label">PREZENȚĂ ȘEDINȚĂ</span>
             </button>
 
 
@@ -11520,7 +11686,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data-section="docs"
                 type="button"
             >
-                DOCS
+                <span class="nav-real-icon"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 11h6M9 15h6"/></svg></span><span class="nav-real-label">DOCS</span>
             </button>
 
 
@@ -11534,7 +11700,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data-section="penal-code"
                 type="button"
             >
-                COD PENAL
+                <span class="nav-real-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 6h10M5 9h4l-2 5H3zM15 9h4l2 5h-4z"/><path d="M8 21h8"/></svg></span><span class="nav-real-label">COD PENAL</span>
             </button>
 <div class="sidebar-admin-separator"></div>
 
@@ -11553,7 +11719,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data-section="leadership"
                 type="button"
             >
-                ANUNȚURI
+                <span class="nav-real-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H7l-3 3z"/><path d="M8 9h8M8 13h5"/></svg></span><span class="nav-real-label">ANUNȚURI</span>
             </button>
 
 
@@ -11563,7 +11729,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data-section="blacklist"
                 type="button"
             >
-                BLACKLIST
+                <span class="nav-real-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m6 6 12 12"/></svg></span><span class="nav-real-label">BLACKLIST</span>
             </button>
 
 
@@ -11573,7 +11739,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data-section="admin"
                 type="button"
             >
-                ADMINISTRARE
+                <span class="nav-real-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/></svg></span><span class="nav-real-label">ADMINISTRARE</span>
             </button>
 
 
@@ -11595,7 +11761,7 @@ body.v8-font-small{font-size:92%!important}body.v8-font-large{font-size:108%!imp
                 data-section="profile"
                 type="button"
             >
-                PROFILUL MEU
+                <span class="nav-real-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 21c.8-4.6 3.1-7 7-7s6.2 2.4 7 7"/></svg></span><span class="nav-real-label">PROFILUL MEU</span>
             </button>
 
 
