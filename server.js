@@ -15243,123 +15243,6 @@ app.get(
 
 
 // ======================================================
-// 404 API
-// ======================================================
-
-app.use(
-    "/api",
-
-    (
-        req,
-        res
-    ) => {
-
-        res
-            .status(404)
-            .json({
-                error:
-                    "Ruta API nu există."
-            });
-    }
-);
-
-
-// ======================================================
-// ERROR HANDLER
-// ======================================================
-
-app.use(
-    (
-        error,
-        req,
-        res,
-        next
-    ) => {
-
-        console.error(
-            "Server Error:",
-            error
-        );
-
-
-        if (
-            error instanceof
-            multer.MulterError
-        ) {
-
-            if (
-                error.code ===
-                "LIMIT_FILE_SIZE"
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        error:
-                            "O imagine depășește limita de 8 MB."
-                    });
-            }
-
-
-            if (
-                error.code ===
-                "LIMIT_FILE_COUNT"
-            ) {
-
-                return res
-                    .status(400)
-                    .json({
-                        error:
-                            "Poți încărca maximum 5 imagini."
-                    });
-            }
-
-
-            return res
-                .status(400)
-                .json({
-                    error:
-                        error.message
-                });
-        }
-
-
-        if (
-            error?.message ===
-            "Sunt acceptate doar imagini JPG, PNG și WEBP."
-        ) {
-
-            return res
-                .status(400)
-                .json({
-                    error:
-                        error.message
-                });
-        }
-
-
-        if (
-            res.headersSent
-        ) {
-
-            return next(
-                error
-            );
-        }
-
-
-        res
-            .status(500)
-            .json({
-                error:
-                    "A apărut o eroare internă pe server."
-            });
-    }
-);
-
-
-
-// ======================================================
 // TRANSFER INTERDEPARTAMENTAL — POLITIE <-> DIICOT
 // Persistenta: Backblaze B2
 // Flux: solicitare -> aprobare Politie + aprobare DIICOT -> rol Discord nou
@@ -15703,6 +15586,125 @@ app.post("/api/transfers/:id/decision", requireAuth, async (req, res) => {
         return res.status(500).json({ error: "Decizia nu a putut fi salvată." });
     }
 });
+
+
+
+
+
+// ======================================================
+// 404 API
+// ======================================================
+
+app.use(
+    "/api",
+
+    (
+        req,
+        res
+    ) => {
+
+        res
+            .status(404)
+            .json({
+                error:
+                    "Ruta API nu există."
+            });
+    }
+);
+
+
+// ======================================================
+// ERROR HANDLER
+// ======================================================
+
+app.use(
+    (
+        error,
+        req,
+        res,
+        next
+    ) => {
+
+        console.error(
+            "Server Error:",
+            error
+        );
+
+
+        if (
+            error instanceof
+            multer.MulterError
+        ) {
+
+            if (
+                error.code ===
+                "LIMIT_FILE_SIZE"
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "O imagine depășește limita de 8 MB."
+                    });
+            }
+
+
+            if (
+                error.code ===
+                "LIMIT_FILE_COUNT"
+            ) {
+
+                return res
+                    .status(400)
+                    .json({
+                        error:
+                            "Poți încărca maximum 5 imagini."
+                    });
+            }
+
+
+            return res
+                .status(400)
+                .json({
+                    error:
+                        error.message
+                });
+        }
+
+
+        if (
+            error?.message ===
+            "Sunt acceptate doar imagini JPG, PNG și WEBP."
+        ) {
+
+            return res
+                .status(400)
+                .json({
+                    error:
+                        error.message
+                });
+        }
+
+
+        if (
+            res.headersSent
+        ) {
+
+            return next(
+                error
+            );
+        }
+
+
+        res
+            .status(500)
+            .json({
+                error:
+                    "A apărut o eroare internă pe server."
+            });
+    }
+);
 
 
 
