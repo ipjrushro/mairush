@@ -2629,7 +2629,111 @@ function mapDocsRow(row) {
 }
 
 
-// ======================================================\n// DISCORD — ROLURI CONCEDIU / ÎNVOIRE\n// ======================================================\n\nfunction getLeaveDiscordRoleId(type) {\n    return String(type || "").toUpperCase() === "VACATION"\n        ? VACATION_DISCORD_ROLE_ID\n        : String(type || "").toUpperCase() === "MEETING_EXCUSE"\n            ? MEETING_EXCUSE_DISCORD_ROLE_ID\n            : null;\n}\n\nasync function setDiscordMemberRole(userId, roleId, enabled) {\n    if (!BOT_TOKEN || !GUILD_ID || !userId || !roleId) {\n        throw new Error("Discord nu este configurat complet pentru rolurile de concediu/învoire.");\n    }\n\n    const url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${String(userId)}/roles/${String(roleId)}`;\n    const config = { headers: { Authorization: `Bot ${BOT_TOKEN}`, "Content-Type": "application/json" }, timeout: 12000 };\n\n    if (enabled) {\n        await axios.put(url, {}, config);\n    } else {\n        await axios.delete(url, config);\n    }\n\n    // Membrul s-a schimbat; nu păstrăm în cache rolurile vechi.\n    discordMemberCache.delete(String(userId));\n}\n\nfunction getLeaveExpirationMs(request) {\n    if (!request) return 0;\n\n    if (request.type === "MEETING_EXCUSE") {\n        const approvedAt = new Date(request.decided_at || request.created_at || 0).getTime();\n        return Number.isFinite(approvedAt) ? approvedAt + MEETING_EXCUSE_DURATION_MS : 0;\n    }\n\n    if (request.type === "VACATION") {\n        // Rolul rămâne inclusiv în ultima zi de concediu.\n        // Folosim miezul nopții zilei următoare; o diferență DST de o oră nu poate\n        // elimina rolul înainte de sfârșitul datei calendaristice din România.\n        const match = String(request.end_date || "").match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);\n        if (!match) return 0;\n        const nextDayUtc = Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]) + 1, 0, 0, 0);\n        return nextDayUtc;\n    }\n\n    return 0;\n}\n\nfunction isLeaveRequestActiveNow(request, now = Date.now()) {\n    if (!request || request.status !== "APPROVED") return false;\n    const expiresAt = getLeaveExpirationMs(request);\n    return expiresAt > now;\n}\n\nasync function syncApprovedLeaveDiscordRoles() {\n    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !BOT_TOKEN || !GUILD_ID) return;\n\n    try {\n        const { data, error } = await supabase\n            .from("leave_requests")\n            .select("id, author_id, type, status, end_date, decided_at, created_at")\n            .eq("status", "APPROVED")\n            .in("type", ["VACATION", "MEETING_EXCUSE"]);\n\n        if (error) throw error;\n\n        const now = Date.now();\n        const grouped = new Map();\n\n        for (const row of data || []) {\n            const key = `${row.author_id}:${row.type}`;\n            if (!grouped.has(key)) grouped.set(key, []);\n            grouped.get(key).push(row);\n        }\n\n        for (const [key, requests] of grouped.entries()) {\n            const [userId, type] = key.split(":");\n            const roleId = getLeaveDiscordRoleId(type);\n            if (!roleId) continue;\n\n            const shouldHaveRole = requests.some(row => isLeaveRequestActiveNow(row, now));\n\n            try {\n                await setDiscordMemberRole(userId, roleId, shouldHaveRole);\n            } catch (error) {\n                // 404 = membrul nu mai este pe server; nu blocăm restul sincronizării.\n                console.error(`[Leave Role Sync] ${userId} / ${type}:`, error?.response?.data || error?.message || error);\n            }\n        }\n    } catch (error) {\n        console.error("Leave Role Sync Error:", error?.message || error);\n    }\n}\n\nfunction initLeaveRoleScheduler() {\n    // Sincronizare la pornire + periodic. Astfel funcționează și după restart/deploy Render.\n    setTimeout(() => syncApprovedLeaveDiscordRoles(), 5000);\n    const timer = setInterval(() => syncApprovedLeaveDiscordRoles(), LEAVE_ROLE_SYNC_INTERVAL_MS);\n    if (typeof timer.unref === "function") timer.unref();\n}\n\n// ======================================================
+// ======================================================
+// DISCORD — ROLURI CONCEDIU / ÎNVOIRE
+// ======================================================
+
+function getLeaveDiscordRoleId(type) {
+    return String(type || "").toUpperCase() === "VACATION"
+        ? VACATION_DISCORD_ROLE_ID
+        : String(type || "").toUpperCase() === "MEETING_EXCUSE"
+            ? MEETING_EXCUSE_DISCORD_ROLE_ID
+            : null;
+}
+
+async function setDiscordMemberRole(userId, roleId, enabled) {
+    if (!BOT_TOKEN || !GUILD_ID || !userId || !roleId) {
+        throw new Error("Discord nu este configurat complet pentru rolurile de concediu/învoire.");
+    }
+
+    const url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${String(userId)}/roles/${String(roleId)}`;
+    const config = { headers: { Authorization: `Bot ${BOT_TOKEN}`, "Content-Type": "application/json" }, timeout: 12000 };
+
+    if (enabled) {
+        await axios.put(url, {}, config);
+    } else {
+        await axios.delete(url, config);
+    }
+
+    // Membrul s-a schimbat; nu păstrăm în cache rolurile vechi.
+    discordMemberCache.delete(String(userId));
+}
+
+function getLeaveExpirationMs(request) {
+    if (!request) return 0;
+
+    if (request.type === "MEETING_EXCUSE") {
+        const approvedAt = new Date(request.decided_at || request.created_at || 0).getTime();
+        return Number.isFinite(approvedAt) ? approvedAt + MEETING_EXCUSE_DURATION_MS : 0;
+    }
+
+    if (request.type === "VACATION") {
+        // Rolul rămâne inclusiv în ultima zi de concediu.
+        // Folosim miezul nopții zilei următoare; o diferență DST de o oră nu poate
+        // elimina rolul înainte de sfârșitul datei calendaristice din România.
+        const match = String(request.end_date || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!match) return 0;
+        const nextDayUtc = Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]) + 1, 0, 0, 0);
+        return nextDayUtc;
+    }
+
+    return 0;
+}
+
+function isLeaveRequestActiveNow(request, now = Date.now()) {
+    if (!request || request.status !== "APPROVED") return false;
+    const expiresAt = getLeaveExpirationMs(request);
+    return expiresAt > now;
+}
+
+async function syncApprovedLeaveDiscordRoles() {
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !BOT_TOKEN || !GUILD_ID) return;
+
+    try {
+        const { data, error } = await supabase
+            .from("leave_requests")
+            .select("id, author_id, type, status, end_date, decided_at, created_at")
+            .eq("status", "APPROVED")
+            .in("type", ["VACATION", "MEETING_EXCUSE"]);
+
+        if (error) throw error;
+
+        const now = Date.now();
+        const grouped = new Map();
+
+        for (const row of data || []) {
+            const key = `${row.author_id}:${row.type}`;
+            if (!grouped.has(key)) grouped.set(key, []);
+            grouped.get(key).push(row);
+        }
+
+        for (const [key, requests] of grouped.entries()) {
+            const [userId, type] = key.split(":");
+            const roleId = getLeaveDiscordRoleId(type);
+            if (!roleId) continue;
+
+            const shouldHaveRole = requests.some(row => isLeaveRequestActiveNow(row, now));
+
+            try {
+                await setDiscordMemberRole(userId, roleId, shouldHaveRole);
+            } catch (error) {
+                // 404 = membrul nu mai este pe server; nu blocăm restul sincronizării.
+                console.error(`[Leave Role Sync] ${userId} / ${type}:`, error?.response?.data || error?.message || error);
+            }
+        }
+    } catch (error) {
+        console.error("Leave Role Sync Error:", error?.message || error);
+    }
+}
+
+function initLeaveRoleScheduler() {
+    // Sincronizare la pornire + periodic. Astfel funcționează și după restart/deploy Render.
+    setTimeout(() => syncApprovedLeaveDiscordRoles(), 5000);
+    const timer = setInterval(() => syncApprovedLeaveDiscordRoles(), LEAVE_ROLE_SYNC_INTERVAL_MS);
+    if (typeof timer.unref === "function") timer.unref();
+}
+
+// ======================================================
 // CONCEDII HELPERS
 // ======================================================
 
@@ -15158,362 +15262,6 @@ app.use(
             });
     }
 );
-
-
-
-// ======================================================
-// TRANSFER ÎNTRE STRUCTURI — POLIȚIE <-> DIICOT
-// Dublă aprobare: Conducere Poliție + Conducere DIICOT.
-// Persistență în Backblaze B2, fără tabel Supabase nou.
-// ======================================================
-
-const TRANSFER_REQUEST_PREFIX = "transfers/requests/";
-
-const POLICE_TRANSFER_ROLES = Object.freeze([
-    "1528758226437275791","1528758226437275788","1528758226437275787",
-    "1528758226437275786","1528758226428891368","1528758226428891366",
-    "1528758226428891365","1528758226428891364","1528758226428891363",
-    "1528758226428891362","1528758226428891361","1528758226428891360",
-    "1528758226428891359","1528758226420633752","1528758226420633750"
-]);
-
-const DIICOT_TRANSFER_ROLES = Object.freeze([
-    "1528758226407919644", // Agent Stagiar — gradul de intrare
-    "1528758226407919645", // Agent Operativ
-    "1528758226416435210", // Agent Principal
-    "1528758226416435211", // Sub Inspector
-    "1528758226416435213", // Inspector
-    "1528758226416435214", // Inspector Principal
-    "1528758226416435215", // Sub Comisar
-    "1528758226416435216", // Comisar
-    "1528758226416435217", // Comisar Șef
-    "1528758226416435219", // Coordonator
-    "1528758226420633744", // Procuror
-    "1528758226420633745", // Procuror Șef Adjunct
-    "1528758226420633746"  // Procuror Șef
-]);
-
-const POLICE_LOWEST_TRANSFER_ROLE_ID = "1528758226420633750"; // CADET
-const DIICOT_LOWEST_TRANSFER_ROLE_ID = "1528758226407919644"; // AGENT STAGIAR
-
-const POLICE_TRANSFER_LEADERSHIP_ROLES = new Set([
-    "1528758226428891368", // Comisar Șef
-    "1528758226437275786", // Chestor Secundar
-    "1528758226437275787", // Chestor Principal
-    "1528758226437275788", // Chestor General
-    "1528758226437275791"  // Responsabil Guvernamentale
-]);
-
-const DIICOT_TRANSFER_LEADERSHIP_ROLES = new Set([
-    "1528758226416435219", // Coordonator
-    "1528758226420633744", // Procuror
-    "1528758226420633745", // Procuror Șef Adjunct
-    "1528758226420633746"  // Procuror Șef
-]);
-
-function transferB2Ready() {
-    return Boolean(B2_BUCKET && B2_REGION && B2_ENDPOINT && B2_KEY_ID && B2_APPLICATION_KEY);
-}
-
-function transferRoleSet(department) {
-    return String(department || "").toUpperCase() === "DIICOT"
-        ? DIICOT_TRANSFER_ROLES
-        : POLICE_TRANSFER_ROLES;
-}
-
-function memberHasAnyRole(member, roleIds) {
-    const roles = new Set((member?.roles || []).map(String));
-    return roleIds.some(id => roles.has(String(id)));
-}
-
-function transferLeadershipForMember(member) {
-    const roles = new Set((member?.roles || []).map(String));
-    const police = [...POLICE_TRANSFER_LEADERSHIP_ROLES].some(id => roles.has(id));
-    const diicot = [...DIICOT_TRANSFER_LEADERSHIP_ROLES].some(id => roles.has(id));
-    return { police, diicot };
-}
-
-async function putTransferRequest(row) {
-    if (!transferB2Ready()) throw new Error("Backblaze B2 nu este configurat pentru transferuri.");
-    await b2.send(new PutObjectCommand({
-        Bucket: B2_BUCKET,
-        Key: `${TRANSFER_REQUEST_PREFIX}${row.id}.json`,
-        Body: JSON.stringify(row, null, 2),
-        ContentType: "application/json; charset=utf-8",
-        CacheControl: "no-store"
-    }));
-}
-
-async function getTransferRequest(id) {
-    return readB2JSON(`${TRANSFER_REQUEST_PREFIX}${String(id)}.json`);
-}
-
-async function listTransferRequests() {
-    if (!transferB2Ready()) throw new Error("Backblaze B2 nu este configurat pentru transferuri.");
-    const rows = [];
-    let token = undefined;
-
-    do {
-        const page = await b2.send(new ListObjectsV2Command({
-            Bucket: B2_BUCKET,
-            Prefix: TRANSFER_REQUEST_PREFIX,
-            ContinuationToken: token
-        }));
-
-        for (const item of page.Contents || []) {
-            if (!String(item.Key || "").endsWith(".json")) continue;
-            try {
-                rows.push(await readB2JSON(item.Key));
-            } catch (error) {
-                console.warn("[Transfer] Nu pot citi", item.Key, error?.message || error);
-            }
-        }
-
-        token = page.IsTruncated ? page.NextContinuationToken : undefined;
-    } while (token);
-
-    return rows.sort((a, b) =>
-        new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-    );
-}
-
-async function transferDiscordMember(userId, source, destination) {
-    const member = await getDiscordMemberCached(userId, { force: true });
-    const currentRoles = new Set((member?.roles || []).map(String));
-    const sourceRoles = transferRoleSet(source);
-    const destinationRole =
-        destination === "DIICOT"
-            ? DIICOT_LOWEST_TRANSFER_ROLE_ID
-            : POLICE_LOWEST_TRANSFER_ROLE_ID;
-
-    // Întâi acordăm gradul de intrare, apoi scoatem gradele structurii vechi.
-    if (!currentRoles.has(destinationRole)) {
-        await setDiscordMemberRole(userId, destinationRole, true);
-    }
-
-    for (const roleId of sourceRoles) {
-        if (currentRoles.has(String(roleId))) {
-            await setDiscordMemberRole(userId, roleId, false);
-        }
-    }
-
-    discordMemberCache.delete(String(userId));
-    return destinationRole;
-}
-
-function transferPublicRow(row, viewerId, leadership) {
-    return {
-        ...row,
-        canDecidePolice: Boolean(leadership.police && row.status === "PENDING"),
-        canDecideDiicot: Boolean(leadership.diicot && row.status === "PENDING"),
-        isMine: String(row.userId) === String(viewerId)
-    };
-}
-
-app.get("/api/transfers", requireAuth, async (req, res) => {
-    try {
-        const liveMember = await getDiscordMemberCached(req.session.user.id, { force: true });
-        const leadership = transferLeadershipForMember(liveMember);
-        const all = await listTransferRequests();
-
-        const visible = all.filter(row =>
-            String(row.userId) === String(req.session.user.id) ||
-            leadership.police ||
-            leadership.diicot
-        );
-
-        return res.json({
-            requests: visible.map(row =>
-                transferPublicRow(row, req.session.user.id, leadership)
-            ),
-            leadership
-        });
-    } catch (error) {
-        console.error("Transfer List Error:", error?.message || error);
-        return res.status(500).json({ error: "Cererile de transfer nu au putut fi încărcate." });
-    }
-});
-
-app.post("/api/transfers", requireAuth, async (req, res) => {
-    try {
-        const source = String(req.body?.source || "").trim().toUpperCase();
-        const destination = source === "POLITIE" ? "DIICOT" : source === "DIICOT" ? "POLITIE" : "";
-        const reason = String(req.body?.reason || "").trim().slice(0, 1200);
-        const age = Number.parseInt(req.body?.age, 10);
-
-        if (!destination) return res.status(400).json({ error: "Structura sursă este invalidă." });
-        if (reason.length < 10) return res.status(400).json({ error: "Motivul transferului trebuie să aibă minimum 10 caractere." });
-        if (!Number.isInteger(age) || age < 14 || age > 99) return res.status(400).json({ error: "Vârsta introdusă nu este validă." });
-
-        const member = await getDiscordMemberCached(req.session.user.id, { force: true });
-        if (!memberHasAnyRole(member, transferRoleSet(source))) {
-            return res.status(403).json({ error: `Nu ai un grad activ în structura ${source}.` });
-        }
-
-        const all = await listTransferRequests();
-        const existing = all.find(row =>
-            String(row.userId) === String(req.session.user.id) &&
-            row.status === "PENDING"
-        );
-        if (existing) {
-            return res.status(409).json({ error: "Ai deja o cerere de transfer în așteptare." });
-        }
-
-        const row = {
-            id: crypto.randomUUID(),
-            userId: String(req.session.user.id),
-            userName: req.session.user.displayName || req.session.user.globalName || req.session.user.username || "Membru",
-            source,
-            destination,
-            reason,
-            age,
-            status: "PENDING",
-            policeDecision: "PENDING",
-            policeDecidedBy: null,
-            policeDecidedAt: null,
-            diicotDecision: "PENDING",
-            diicotDecidedBy: null,
-            diicotDecidedAt: null,
-            createdAt: new Date().toISOString(),
-            completedAt: null,
-            destinationRoleId: null
-        };
-
-        await putTransferRequest(row);
-
-        try {
-            await sendDiscordDM(
-                row.userId,
-                `📨 Cererea ta de transfer ${source} → ${destination} a fost înregistrată.\n` +
-                `Este necesară aprobarea Conducerii Poliției și a Conducerii DIICOT.`
-            );
-        } catch (dmError) {
-            console.warn("Transfer Create DM:", dmError?.message || dmError);
-        }
-
-        return res.status(201).json({ success: true, request: row });
-    } catch (error) {
-        console.error("Transfer Create Error:", error?.message || error);
-        return res.status(500).json({ error: "Cererea de transfer nu a putut fi trimisă." });
-    }
-});
-
-app.post("/api/transfers/:id/decision", requireAuth, async (req, res) => {
-    try {
-        const id = String(req.params.id || "").trim();
-        const department = String(req.body?.department || "").trim().toUpperCase();
-        const decision = String(req.body?.decision || "").trim().toUpperCase();
-
-        if (!["POLITIE", "DIICOT"].includes(department) || !["APPROVED", "REJECTED"].includes(decision)) {
-            return res.status(400).json({ error: "Decizie invalidă." });
-        }
-
-        const approver = await getDiscordMemberCached(req.session.user.id, { force: true });
-        const leadership = transferLeadershipForMember(approver);
-
-        if ((department === "POLITIE" && !leadership.police) ||
-            (department === "DIICOT" && !leadership.diicot)) {
-            return res.status(403).json({ error: `Nu faci parte din Conducerea ${department}.` });
-        }
-
-        const row = await getTransferRequest(id);
-        if (!row || row.status !== "PENDING") {
-            return res.status(409).json({ error: "Cererea nu mai este în așteptare." });
-        }
-
-        const key = department === "POLITIE" ? "police" : "diicot";
-        if (row[`${key}Decision`] !== "PENDING") {
-            return res.status(409).json({ error: `Conducerea ${department} a luat deja o decizie.` });
-        }
-
-        row[`${key}Decision`] = decision;
-        row[`${key}DecidedBy`] = {
-            id: String(req.session.user.id),
-            name: req.session.user.displayName || req.session.user.globalName || req.session.user.username || "Conducere"
-        };
-        row[`${key}DecidedAt`] = new Date().toISOString();
-
-        if (decision === "REJECTED") {
-            row.status = "REJECTED";
-            row.rejectedByDepartment = department;
-            await putTransferRequest(row);
-
-            try {
-                await sendDiscordDM(
-                    row.userId,
-                    `❌ Cererea ta de transfer ${row.source} → ${row.destination} a fost respinsă de Conducerea ${department}.`
-                );
-            } catch (dmError) {
-                console.warn("Transfer Reject DM:", dmError?.message || dmError);
-            }
-
-            return res.json({ success: true, request: row });
-        }
-
-        const bothApproved =
-            row.policeDecision === "APPROVED" &&
-            row.diicotDecision === "APPROVED";
-
-        if (bothApproved) {
-            try {
-                const destinationRoleId = await transferDiscordMember(
-                    row.userId,
-                    row.source,
-                    row.destination
-                );
-
-                row.status = "COMPLETED";
-                row.completedAt = new Date().toISOString();
-                row.destinationRoleId = destinationRoleId;
-                await putTransferRequest(row);
-
-                try {
-                    const newRank = row.destination === "DIICOT" ? "AGENT STAGIAR" : "CADET";
-                    await sendDiscordDM(
-                        row.userId,
-                        `✅ Transfer aprobat de ambele structuri.\n` +
-                        `${row.source} → ${row.destination}\n` +
-                        `Transferul a fost efectuat automat, iar gradul de intrare acordat este: ${newRank}.`
-                    );
-                } catch (dmError) {
-                    console.warn("Transfer Complete DM:", dmError?.message || dmError);
-                }
-            } catch (transferError) {
-                row.status = "APPROVED_WAITING_EXECUTION";
-                row.executionError = String(
-                    transferError?.response?.data?.message ||
-                    transferError?.message ||
-                    "Eroare Discord"
-                ).slice(0, 500);
-                await putTransferRequest(row);
-                console.error("Transfer Discord Execution Error:", transferError?.response?.data || transferError?.message || transferError);
-                return res.status(502).json({
-                    error: "Ambele conduceri au aprobat, dar Discord nu a putut executa transferul. Verifică ierarhia rolurilor botului.",
-                    request: row
-                });
-            }
-        } else {
-            await putTransferRequest(row);
-            try {
-                await sendDiscordDM(
-                    row.userId,
-                    `✅ Conducerea ${department} a aprobat cererea ta de transfer ${row.source} → ${row.destination}.\n` +
-                    `Mai este necesară aprobarea celeilalte structuri.`
-                );
-            } catch (dmError) {
-                console.warn("Transfer Partial Approval DM:", dmError?.message || dmError);
-            }
-        }
-
-        return res.json({ success: true, request: row });
-    } catch (error) {
-        const status = Number(error?.$metadata?.httpStatusCode || error?.statusCode || 0);
-        console.error("Transfer Decision Error:", error?.message || error);
-        return res.status(status === 404 ? 404 : 500).json({
-            error: status === 404 ? "Cererea de transfer nu există." : "Decizia nu a putut fi salvată."
-        });
-    }
-});
 
 
 // ======================================================
