@@ -146,6 +146,13 @@ const TRAINING_REPORT_CHANNEL_ID = "1541879731127976056";
 
 const VACATION_DAYS_LIMIT = 14;
 const MEETING_EXCUSES_LIMIT = 2;
+
+// Roluri Discord pentru concedii / învoiri
+const VACATION_DISCORD_ROLE_ID = "1528758226319966341";
+const MEETING_EXCUSE_DISCORD_ROLE_ID = "1528758226319966340";
+const MEETING_EXCUSE_DURATION_MS = 24 * 60 * 60 * 1000;
+const LEAVE_ROLE_SYNC_INTERVAL_MS = 5 * 60 * 1000;
+
 const TESTER_DIICOT_ROLE_ID = "1528758226407919637";
 const LEAVE_RESET_USER_ID = "1315733546312142921";
 
@@ -2622,7 +2629,7 @@ function mapDocsRow(row) {
 }
 
 
-// ======================================================
+// ======================================================\n// DISCORD — ROLURI CONCEDIU / ÎNVOIRE\n// ======================================================\n\nfunction getLeaveDiscordRoleId(type) {\n    return String(type || "").toUpperCase() === "VACATION"\n        ? VACATION_DISCORD_ROLE_ID\n        : String(type || "").toUpperCase() === "MEETING_EXCUSE"\n            ? MEETING_EXCUSE_DISCORD_ROLE_ID\n            : null;\n}\n\nasync function setDiscordMemberRole(userId, roleId, enabled) {\n    if (!BOT_TOKEN || !GUILD_ID || !userId || !roleId) {\n        throw new Error("Discord nu este configurat complet pentru rolurile de concediu/învoire.");\n    }\n\n    const url = `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${String(userId)}/roles/${String(roleId)}`;\n    const config = { headers: { Authorization: `Bot ${BOT_TOKEN}`, "Content-Type": "application/json" }, timeout: 12000 };\n\n    if (enabled) {\n        await axios.put(url, {}, config);\n    } else {\n        await axios.delete(url, config);\n    }\n\n    // Membrul s-a schimbat; nu păstrăm în cache rolurile vechi.\n    discordMemberCache.delete(String(userId));\n}\n\nfunction getLeaveExpirationMs(request) {\n    if (!request) return 0;\n\n    if (request.type === "MEETING_EXCUSE") {\n        const approvedAt = new Date(request.decided_at || request.created_at || 0).getTime();\n        return Number.isFinite(approvedAt) ? approvedAt + MEETING_EXCUSE_DURATION_MS : 0;\n    }\n\n    if (request.type === "VACATION") {\n        // Rolul rămâne inclusiv în ultima zi de concediu.\n        // Folosim miezul nopții zilei următoare; o diferență DST de o oră nu poate\n        // elimina rolul înainte de sfârșitul datei calendaristice din România.\n        const match = String(request.end_date || "").match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);\n        if (!match) return 0;\n        const nextDayUtc = Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]) + 1, 0, 0, 0);\n        return nextDayUtc;\n    }\n\n    return 0;\n}\n\nfunction isLeaveRequestActiveNow(request, now = Date.now()) {\n    if (!request || request.status !== "APPROVED") return false;\n    const expiresAt = getLeaveExpirationMs(request);\n    return expiresAt > now;\n}\n\nasync function syncApprovedLeaveDiscordRoles() {\n    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !BOT_TOKEN || !GUILD_ID) return;\n\n    try {\n        const { data, error } = await supabase\n            .from("leave_requests")\n            .select("id, author_id, type, status, end_date, decided_at, created_at")\n            .eq("status", "APPROVED")\n            .in("type", ["VACATION", "MEETING_EXCUSE"]);\n\n        if (error) throw error;\n\n        const now = Date.now();\n        const grouped = new Map();\n\n        for (const row of data || []) {\n            const key = `${row.author_id}:${row.type}`;\n            if (!grouped.has(key)) grouped.set(key, []);\n            grouped.get(key).push(row);\n        }\n\n        for (const [key, requests] of grouped.entries()) {\n            const [userId, type] = key.split(":");\n            const roleId = getLeaveDiscordRoleId(type);\n            if (!roleId) continue;\n\n            const shouldHaveRole = requests.some(row => isLeaveRequestActiveNow(row, now));\n\n            try {\n                await setDiscordMemberRole(userId, roleId, shouldHaveRole);\n            } catch (error) {\n                // 404 = membrul nu mai este pe server; nu blocăm restul sincronizării.\n                console.error(`[Leave Role Sync] ${userId} / ${type}:`, error?.response?.data || error?.message || error);\n            }\n        }\n    } catch (error) {\n        console.error("Leave Role Sync Error:", error?.message || error);\n    }\n}\n\nfunction initLeaveRoleScheduler() {\n    // Sincronizare la pornire + periodic. Astfel funcționează și după restart/deploy Render.\n    setTimeout(() => syncApprovedLeaveDiscordRoles(), 5000);\n    const timer = setInterval(() => syncApprovedLeaveDiscordRoles(), LEAVE_ROLE_SYNC_INTERVAL_MS);\n    if (typeof timer.unref === "function") timer.unref();\n}\n\n// ======================================================
 // CONCEDII HELPERS
 // ======================================================
 
@@ -6686,10 +6693,52 @@ app.patch(
             }
 
 
+            // Discord: rol + mesaj privat după ce decizia a fost salvată.
+            // O eroare Discord nu anulează decizia deja salvată în Supabase.
+            const leaveDiscordWarnings = [];
+            const leaveRoleId = getLeaveDiscordRoleId(existing.type);
+            const memberId = String(existing.author_id);
+            const evaluatorName = req.session.user.displayName || req.session.user.username;
+
+            if (decision === "APPROVED" && leaveRoleId) {
+                try {
+                    await setDiscordMemberRole(memberId, leaveRoleId, true);
+                } catch (discordRoleError) {
+                    console.error("Leave Discord Role Add Error:", discordRoleError?.response?.data || discordRoleError?.message || discordRoleError);
+                    leaveDiscordWarnings.push("Cererea a fost aprobată, dar rolul Discord nu a putut fi adăugat.");
+                }
+            }
+
+            try {
+                if (decision === "APPROVED") {
+                    const typeLabel = existing.type === "VACATION" ? "concediu" : "învoire";
+                    const durationText = existing.type === "MEETING_EXCUSE"
+                        ? "Învoirea este valabilă 24 de ore de la aprobare."
+                        : `Concediul este aprobat pentru perioada ${formatDateOnlyRO(`${existing.start_date}T12:00:00`)} - ${formatDateOnlyRO(`${existing.end_date}T12:00:00`)}.`;
+                    await sendDiscordDM(
+                        memberId,
+                        `✅ CERERE ${typeLabel.toUpperCase()} APROBATĂ\n\nCererea ta de ${typeLabel} a fost acceptată.\n${durationText}${decisionNote ? `\nObservație: **${decisionNote}**` : ""}\n\nAprobată de: **${evaluatorName}**`
+                    );
+                } else {
+                    const typeLabel = existing.type === "VACATION" ? "concediu" : "învoire";
+                    await sendDiscordDM(
+                        memberId,
+                        `❌ CERERE ${typeLabel.toUpperCase()} RESPINSĂ\n\nCererea ta de ${typeLabel} a fost respinsă.${decisionNote ? `\nMotiv: **${decisionNote}**` : ""}\n\nDecizie luată de: **${evaluatorName}**`
+                    );
+                }
+            } catch (discordDmError) {
+                console.error("Leave Discord DM Error:", discordDmError?.response?.data || discordDmError?.message || discordDmError);
+                leaveDiscordWarnings.push("Decizia a fost salvată, dar mesajul privat Discord nu a putut fi trimis.");
+            }
+
+
             res.json({
 
                 success:
                     true,
+
+                discordWarnings:
+                    leaveDiscordWarnings,
 
                 message:
                     decision ===
@@ -15232,5 +15281,6 @@ app.listen(
         configureB2CorsForDirectUpload();
 
         initMeetingAttendanceScheduler();
+        initLeaveRoleScheduler();
     }
 );
