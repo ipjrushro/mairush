@@ -14877,7 +14877,8 @@ app.post(
 // ======================================================
 
 const MEETING_ATTENDANCE_USER_ID = "1315733546312142921";
-const MEETING_VOICE_CHANNEL_NAME = "Ședință DIICOT";
+const MEETING_VOICE_CHANNEL_ID = "1529137764828713040";
+const MEETING_RESULT_CHANNEL_ID = "1551928220633399417";
 const MEETING_ATTENDANCE_STATE_KEY = "system/meeting-attendance.json";
 
 let meetingAttendanceJobs = [];
@@ -14888,8 +14889,8 @@ function requireMeetingAttendanceAccess(req, res, next) {
         return res.status(401).json({ error: "Trebuie să fii autentificat." });
     }
 
-    if (String(req.session.user.id || "") !== MEETING_ATTENDANCE_USER_ID) {
-        return res.status(403).json({ error: "Nu ai acces la această secțiune." });
+    if (!hasPoliceFullAccess(req.session.user)) {
+        return res.status(403).json({ error: "Doar Conducerea Poliției are acces la această secțiune." });
     }
 
     next();
@@ -14964,13 +14965,12 @@ async function discordGuildChannels() {
 async function resolveMeetingVoiceChannel() {
     const channels = await discordGuildChannels();
     const target = channels.find(channel =>
-        String(channel?.name || "").trim().toLocaleLowerCase("ro-RO") ===
-        MEETING_VOICE_CHANNEL_NAME.toLocaleLowerCase("ro-RO") &&
+        String(channel?.id || "") === MEETING_VOICE_CHANNEL_ID &&
         [2, 13].includes(Number(channel?.type))
     );
 
     if (!target?.id) {
-        throw new Error(`Nu am găsit canalul voice „${MEETING_VOICE_CHANNEL_NAME}”.`);
+        throw new Error(`Nu am găsit canalul voice configurat (${MEETING_VOICE_CHANNEL_ID}).`);
     }
 
     return target;
@@ -15114,7 +15114,7 @@ async function applyMeetingAbsenceFactionWarn(member, actor = {}) {
         return { targetId, targetName, added: 0, activeFw };
     }
 
-    const actorName = actor.displayName || actor.username || "Sistem Prezență DIICOT";
+    const actorName = actor.displayName || actor.username || "Sistem Prezență Poliție";
     const actorRank = actor.rank || "CONTROL AUTOMAT";
     const reason = "Absență nemotivată la ședință";
 
@@ -15159,7 +15159,7 @@ async function applyMeetingAbsenceFactionWarn(member, actor = {}) {
         await sendDiscordDM(
             targetId,
             [
-                "⚠️ **PREZENȚĂ ȘEDINȚĂ — DIICOT**",
+                "⚠️ **PREZENȚĂ ȘEDINȚĂ — POLIȚIA ROMÂNĂ**",
                 "",
                 `Ai primit **${fwCount} Faction Warn** pentru absență nemotivată la ședință.`,
                 `**Situație activă:** ${activeFw}/5 FW`,
@@ -15172,6 +15172,42 @@ async function applyMeetingAbsenceFactionWarn(member, actor = {}) {
     }
 
     return { targetId, targetName, added: fwCount, activeFw };
+}
+
+async function sendMeetingAttendanceResult(result) {
+    if (!BOT_TOKEN || !MEETING_RESULT_CHANNEL_ID) return;
+
+    const mentions = rows => (rows || []).length
+        ? rows.map(x => `• <@${x.id}> — ${x.name}`).join("\n").slice(0, 1000)
+        : "—";
+
+    const sanctionText = (result.sanctions || []).length
+        ? result.sanctions.map(x => `• <@${x.targetId}> — +${x.added || 0} FW (${x.activeFw ?? "?"}/5)`).join("\n").slice(0, 1000)
+        : "—";
+
+    const payload = {
+        embeds: [{
+            title: "📋 PREZENȚĂ ȘEDINȚĂ — POLIȚIA ROMÂNĂ",
+            description: `Verificare automată în <#${result.channelId}>`,
+            color: 0x2b8cff,
+            fields: [
+                { name: `✅ PREZENȚI (${result.present.length})`, value: mentions(result.present), inline: false },
+                { name: `🟡 MOTIVAȚI (${result.excused.length})`, value: mentions(result.excused), inline: false },
+                { name: `❌ ABSENȚI (${result.absent.length})`, value: mentions(result.absent), inline: false },
+                { name: `⚠️ NECONFIRMAȚI (${result.unknown.length})`, value: mentions(result.unknown), inline: false },
+                { name: "🛡️ SANCȚIUNI AUTOMATE", value: sanctionText, inline: false }
+            ],
+            footer: { text: "Poliția Română • Centru de Comandă • Rush România" },
+            timestamp: result.checkedAt
+        }],
+        allowed_mentions: { parse: [] }
+    };
+
+    await axios.post(
+        `https://discord.com/api/v10/channels/${MEETING_RESULT_CHANNEL_ID}/messages`,
+        payload,
+        { headers: { Authorization: `Bot ${BOT_TOKEN}`, "Content-Type": "application/json" }, timeout: 15000 }
+    );
 }
 
 async function runMeetingAttendanceCheck(actor = {}) {
@@ -15231,6 +15267,19 @@ async function runMeetingAttendanceCheck(actor = {}) {
 
     const sanctions = [];
     for (const item of absentRows) {
+        // Conducerea Poliției este verificată la prezență, dar NU primește FW automat.
+        // Considerăm conducere: COMISAR ȘEF+ (rank level >= 11) și persoanele
+        // cu acces complet configurate în POLICE_FULL_ACCESS_IDS.
+        const memberRank = resolveHighestDIICOTRoleSafe(item.member?.roles || []);
+        const isLeadership =
+            Number(memberRank?.level || 0) >= 11 ||
+            POLICE_FULL_ACCESS_IDS.has(String(item.id || ""));
+
+        if (isLeadership) {
+            console.log(`[Meeting Attendance] Fără sancțiune pentru conducere: ${item.id} (${item.name})`);
+            continue;
+        }
+
         try {
             sanctions.push(await applyMeetingAbsenceFactionWarn(item.member, actor));
         } catch (error) {
@@ -15243,7 +15292,7 @@ async function runMeetingAttendanceCheck(actor = {}) {
         }
     }
 
-    return {
+    const result = {
         channelId: String(voiceChannel.id),
         channelName: voiceChannel.name,
         checkedAt: new Date().toISOString(),
@@ -15253,6 +15302,14 @@ async function runMeetingAttendanceCheck(actor = {}) {
         unknown,
         sanctions
     };
+
+    try {
+        await sendMeetingAttendanceResult(result);
+    } catch (error) {
+        console.warn("Meeting attendance Discord log warning:", error?.message || error);
+    }
+
+    return result;
 }
 
 function clearMeetingAttendanceTimer(id) {
@@ -15278,7 +15335,7 @@ function armMeetingAttendanceJob(job) {
         try {
             job.result = await runMeetingAttendanceCheck({
                 id: MEETING_ATTENDANCE_USER_ID,
-                displayName: job.createdByName || "Sistem Prezență DIICOT",
+                displayName: job.createdByName || "Sistem Prezență Poliție",
                 rank: "CONTROL AUTOMAT"
             });
             job.status = "COMPLETED";
