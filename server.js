@@ -143,6 +143,13 @@ const POLICE_ANNOUNCEMENT_CHANNELS = Object.freeze({
 const RAID_REPORT_CHANNEL_ID = "1541732669409460345";
 const TRAINING_REPORT_CHANNEL_ID = "1541879731127976056";
 
+// Discord live logs shown on Police overview
+const POLICE_FINE_LOG_CHANNEL_ID = "1528758230191181833";
+const POLICE_JAIL_LOG_CHANNEL_ID = "1528758230191181832";
+const POLICE_LOG_TIMEZONE = "Europe/Bucharest";
+const POLICE_LOG_CACHE_TTL_MS = 60 * 1000;
+let policeLogOverviewCache = { expiresAt: 0, data: null };
+
 
 const VACATION_DAYS_LIMIT = 14;
 const MEETING_EXCUSES_LIMIT = 2;
@@ -4644,6 +4651,135 @@ async function sendOperationalReportToDiscord(report) {
 // ======================================================
 // RAPOARTE - POSTARE
 // ======================================================
+
+// ======================================================
+// POLICE OVERVIEW — DISCORD AMENZI + JAIL
+// Reads only the two configured log channels and deduplicates paired logs.
+// ======================================================
+function discordLogText(message = {}) {
+    const parts = [];
+    if (message.content) parts.push(String(message.content));
+    for (const embed of (Array.isArray(message.embeds) ? message.embeds : [])) {
+        if (embed.title) parts.push(String(embed.title));
+        if (embed.description) parts.push(String(embed.description));
+        for (const field of (Array.isArray(embed.fields) ? embed.fields : [])) {
+            if (field.name) parts.push(String(field.name));
+            if (field.value) parts.push(String(field.value));
+        }
+    }
+    return parts.join("\
+").trim();
+}
+
+function bucharestDayKey(value) {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "";
+    const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: POLICE_LOG_TIMEZONE, year: "numeric", month: "2-digit", day: "2-digit"
+    }).formatToParts(d);
+    const get = type => parts.find(p => p.type === type)?.value || "";
+    return `${get("year")}-${get("month")}-${get("day")}`;
+}
+
+function moneyNumber(raw) {
+    const digits = String(raw || "").replace(/[^0-9]/g, "");
+    return Number(digits || 0);
+}
+
+async function fetchDiscordChannelMessages(channelId, maxPages = 5) {
+    const all = [];
+    let before = null;
+    for (let page = 0; page < maxPages; page += 1) {
+        const response = await axios.get(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+            params: { limit: 100, ...(before ? { before } : {}) },
+            headers: { Authorization: `Bot ${BOT_TOKEN}` },
+            timeout: 12000
+        });
+        const batch = Array.isArray(response.data) ? response.data : [];
+        all.push(...batch);
+        if (batch.length < 100) break;
+        before = batch[batch.length - 1]?.id;
+        if (!before) break;
+        const oldest = batch[batch.length - 1]?.timestamp;
+        const today = bucharestDayKey(new Date());
+        if (oldest && bucharestDayKey(oldest) < today) break;
+    }
+    return all;
+}
+
+function parseFineLog(message) {
+    const text = discordLogText(message);
+    // Ignore the paired "a contribuit la reward" entry. Count only the actual fine.
+    if (!/i-a\s+dat\s+amenda/i.test(text)) return null;
+    const amountMatch = text.match(/amenda\s+(?:in|în)\s+valoare\s+de\s+([0-9.,]+)\s*\$/i);
+    const officerMatch = text.match(/^\s*\[([^\]]+)\]\s*([^\n]+?)\s*\([^)]*\)\s+i-a\s+dat\s+amenda/i);
+    const targetMatch = text.match(/\$\s+lui\s+([^\n.]+?)(?:\s*\([^)]*\))?\s*(?:\.|Motiv:|$)/i);
+    return {
+        id: String(message.id || ""),
+        kind: "fine",
+        timestamp: message.timestamp || message.edited_timestamp || null,
+        amount: moneyNumber(amountMatch?.[1]),
+        officer: officerMatch ? `[${officerMatch[1]}] ${officerMatch[2].trim()}` : "Agent necunoscut",
+        target: targetMatch?.[1]?.trim() || "Persoană sancționată",
+        text
+    };
+}
+
+function parseJailLog(message) {
+    const text = discordLogText(message);
+    // Bail logs are deliberately excluded.
+    if (/platit\s+cautiune|plătit\s+cauțiune/i.test(text)) return null;
+    if (!/l-a\s+inchis\s+pe|l-a\s+închis\s+pe/i.test(text)) return null;
+    const minutesMatch = text.match(/pentru\s+(\d+)\s+minute/i);
+    const officerMatch = text.match(/^\s*\[([^\]]+)\]\s*([^\n]+?)\s*\([^)]*\)\s+l-a/i);
+    const targetMatch = text.match(/l-a\s+(?:inchis|închis)\s+pe\s+([^\n]+?)\s*\([^)]*\)\s+pentru/i);
+    return {
+        id: String(message.id || ""),
+        kind: "jail",
+        timestamp: message.timestamp || message.edited_timestamp || null,
+        minutes: Number(minutesMatch?.[1] || 0),
+        officer: officerMatch ? `[${officerMatch[1]}] ${officerMatch[2].trim()}` : "Agent necunoscut",
+        target: targetMatch?.[1]?.trim() || "Persoană încarcerată",
+        text
+    };
+}
+
+app.get("/api/police-log-overview", requireAuth, async (req, res) => {
+    try {
+        if (policeLogOverviewCache.data && policeLogOverviewCache.expiresAt > Date.now()) {
+            return res.json(policeLogOverviewCache.data);
+        }
+        if (!BOT_TOKEN) return res.status(503).json({ error: "DISCORD_BOT_TOKEN nu este configurat." });
+
+        const [fineMessages, jailMessages] = await Promise.all([
+            fetchDiscordChannelMessages(POLICE_FINE_LOG_CHANNEL_ID),
+            fetchDiscordChannelMessages(POLICE_JAIL_LOG_CHANNEL_ID)
+        ]);
+        const today = bucharestDayKey(new Date());
+        const fines = fineMessages.map(parseFineLog).filter(Boolean).filter(x => bucharestDayKey(x.timestamp) === today);
+        const jails = jailMessages.map(parseJailLog).filter(Boolean).filter(x => bucharestDayKey(x.timestamp) === today);
+        const recent = [...fines, ...jails]
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            .slice(0, 12);
+
+        const payload = {
+            date: today,
+            timezone: POLICE_LOG_TIMEZONE,
+            stats: {
+                fines: fines.length,
+                fineValue: fines.reduce((sum, x) => sum + Number(x.amount || 0), 0),
+                jailed: jails.length,
+                jailMinutes: jails.reduce((sum, x) => sum + Number(x.minutes || 0), 0)
+            },
+            recent
+        };
+        policeLogOverviewCache = { data: payload, expiresAt: Date.now() + POLICE_LOG_CACHE_TTL_MS };
+        res.json(payload);
+    } catch (error) {
+        console.error("Police Log Overview Error:", error?.response?.data || error?.message || error);
+        res.status(502).json({ error: "Nu am putut citi logurile Discord. Verifică accesul botului la canalele Amenzi și Jail." });
+    }
+});
 
 app.post(
     "/api/reports",
