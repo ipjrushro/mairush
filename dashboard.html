@@ -12562,10 +12562,6 @@ body:after{
                         <article><div class="police-live-icon">▦</div><span>PERSOANE ÎNCARCERATE</span><strong id="police-jails-count">—</strong><small>intrări în penitenciar</small></article>
                         <article><div class="police-live-icon">◷</div><span>MINUTE ÎNCHISOARE</span><strong id="police-jail-minutes">—</strong><small>total pedepse aplicate</small></article>
                     </div>
-                    <div class="police-live-feed">
-                        <div class="police-live-feed-title"><span>FLUX OPERAȚIONAL</span><b><i></i> LIVE</b></div>
-                        <div id="police-log-feed"><div class="empty-state">Se încarcă logurile Discord...</div></div>
-                    </div>
                 </section>
 
             </section>
@@ -34393,8 +34389,6 @@ document.addEventListener('click', function(e){
     const money = n => new Intl.NumberFormat("ro-RO").format(Number(n || 0)) + "$";
     const time = iso => { try { return new Intl.DateTimeFormat("ro-RO",{timeZone:"Europe/Bucharest",hour:"2-digit",minute:"2-digit"}).format(new Date(iso)); } catch { return "--:--"; } };
     async function loadPoliceLogOverview(){
-        const feed=document.getElementById("police-log-feed");
-        if(!feed) return;
         try{
             const r=await fetch("/api/police-log-overview",{credentials:"include",cache:"no-store"});
             const data=await r.json().catch(()=>({}));
@@ -34405,15 +34399,9 @@ document.addEventListener('click', function(e){
             document.getElementById("police-jails-count").textContent=Number(s.jailed||0);
             document.getElementById("police-jail-minutes").textContent=new Intl.NumberFormat("ro-RO").format(Number(s.jailMinutes||0));
             document.getElementById("police-live-date").textContent=data.date ? data.date.split("-").reverse().join(".") : "ASTĂZI";
-            const items=Array.isArray(data.recent)?data.recent:[];
-            if(!items.length){feed.innerHTML='<div class="empty-state">Nu există amenzi sau încarcerări înregistrate astăzi.</div>';return;}
-            feed.innerHTML=items.map(x=>{
-                const fine=x.kind==="fine";
-                const detail=fine ? `${esc(x.officer)} a sancționat ${esc(x.target)}` : `${esc(x.officer)} a încarcerat ${esc(x.target)}`;
-                const value=fine ? money(x.amount) : `${Number(x.minutes||0)} min`;
-                return `<div class="police-log-row ${fine?'fine':'jail'}"><div class="police-log-type">${fine?'$':'▦'}</div><div class="police-log-main"><strong>${fine?'AMENDĂ EMISĂ':'ÎNCARCERARE'}</strong><span>${detail}</span></div><div class="police-log-meta"><strong>${value}</strong><span>${time(x.timestamp)}</span></div></div>`;
-            }).join("");
-        }catch(err){feed.innerHTML=`<div class="empty-state" style="color:#ff7474">${esc(err.message)}</div>`;}
+        }catch(err){
+            console.error("Police log overview:", err);
+        }
     }
     window.loadPoliceLogOverview=loadPoliceLogOverview;
     if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",loadPoliceLogOverview); else loadPoliceLogOverview();
