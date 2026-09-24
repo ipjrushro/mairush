@@ -161,6 +161,7 @@ const MEETING_EXCUSE_DURATION_MS = 24 * 60 * 60 * 1000;
 const LEAVE_ROLE_SYNC_INTERVAL_MS = 5 * 60 * 1000;
 
 const TESTER_DIICOT_ROLE_ID = "1528758226407919637";
+const CANDIDATE_TEST_LOG_CHANNEL_ID = "1528758227628462270";
 const LEAVE_RESET_USER_ID = "1315733546312142921";
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
@@ -14666,6 +14667,21 @@ app.post(
                 }
             }
 
+            // Numărăm testele anterioare ale ACESTUI candidat pentru TEST #1, #2, #3...
+            const {
+                count: previousTestCount,
+                error: testCountError
+            } = await supabase
+                .from("test_history")
+                .select("id", { count: "exact", head: true })
+                .eq("candidate_discord", candidateDiscord);
+
+            if (testCountError) {
+                throw testCountError;
+            }
+
+            const candidateTestNumber = Number(previousTestCount || 0) + 1;
+
             const {
                 error:
                     historyError
@@ -14714,6 +14730,56 @@ app.post(
                 throw historyError;
             }
 
+            // Log Discord după ce testul a fost salvat cu succes.
+            // Dacă Discord are o problemă, testul rămâne finalizat în site.
+            if (BOT_TOKEN && CANDIDATE_TEST_LOG_CHANNEL_ID) {
+                try {
+                    const testerName =
+                        req.session.user.displayName ||
+                        req.session.user.username ||
+                        "Tester";
+
+                    const verdictText = verdict === "PASSED" ? "ADMIS" : "RESPINS";
+                    const verdictColor = verdict === "PASSED" ? 0x2ecc71 : 0xe74c3c;
+                    const questionCount = Array.isArray(questions) ? questions.length : 0;
+
+                    await axios.post(
+                        `https://discord.com/api/v10/channels/${CANDIDATE_TEST_LOG_CHANNEL_ID}/messages`,
+                        {
+                            embeds: [
+                                {
+                                    title: `📝 TESTARE CANDIDAT — TEST #${candidateTestNumber}`,
+                                    color: verdictColor,
+                                    fields: [
+                                        { name: "👤 Candidat", value: candidateName || "-", inline: true },
+                                        { name: "🆔 Discord", value: `<@${candidateDiscord}>\n\`${candidateDiscord}\``, inline: true },
+                                        { name: "🎯 Rezultat", value: `**${verdictText}**`, inline: true },
+                                        { name: "👮 Tester", value: `${testerName}\n<@${req.session.user.id}>`, inline: true },
+                                        { name: "❌ Greșeli", value: `${mistakes} / prag ${threshold}`, inline: true },
+                                        { name: "📋 Întrebări", value: String(questionCount), inline: true }
+                                    ],
+                                    footer: { text: `Poliția Română • Testul #${candidateTestNumber} al candidatului` },
+                                    timestamp: new Date().toISOString()
+                                }
+                            ],
+                            allowed_mentions: { parse: [] }
+                        },
+                        {
+                            headers: {
+                                Authorization: `Bot ${BOT_TOKEN}`,
+                                "Content-Type": "application/json"
+                            }
+                        }
+                    );
+                }
+                catch (testLogError) {
+                    console.error(
+                        "Discord Candidate Test Log Error:",
+                        testLogError.response?.data || testLogError.message
+                    );
+                }
+            }
+
             return res
                 .status(201)
                 .json({
@@ -14726,7 +14792,10 @@ app.post(
 
                     mistakes,
 
-                    assignedRoleIds
+                    assignedRoleIds,
+
+                    testNumber:
+                        candidateTestNumber
                 });
 
         }
