@@ -1296,70 +1296,30 @@ function getDIICOTRoleByLevel(level) {
 
 
 function normalizeCallsign(value) {
+    const raw = String(value || "")
+        .trim()
+        .toUpperCase()
+        .replace(/^\[/, "")
+        .replace(/\]$/, "")
+        .replace(/^(?:P-|D-)/, "")
+        .trim();
 
-    let raw =
-        String(value || "")
-            .trim()
-            .toUpperCase();
+    if (!/^\d{1,3}$/.test(raw)) return null;
 
-    /*
-     * Acceptăm:
-     * 6
-     * 06
-     * D-6
-     * D-06
-     * [D-06]
-     */
+    const number = Number(raw);
+    if (!Number.isInteger(number)) return null;
 
-    raw =
-        raw.replace(
-            /^\[?D-/,
-            ""
-        );
+    // Acceptăm exclusiv sloturile/call-sign-urile definite pentru Poliție.
+    const rank = getDocsRankForSlot(number);
+    if (!rank || Number(rank.level) < 0) return null;
 
-    raw =
-        raw.replace(
-            /\]?$/,
-            ""
-        );
-
-    raw =
-        raw.trim();
-
-    if (
-        !/^\d{1,2}$/.test(raw)
-    ) {
-        return null;
-    }
-
-    const number =
-        Number(raw);
-
-    if (
-        !Number.isInteger(number) ||
-        number < 1 ||
-        number > 99
-    ) {
-        return null;
-    }
-
-    return (
-        "D-" +
-        String(number).padStart(
-            2,
-            "0"
-        )
-    );
+    return String(number).padStart(3, "0");
 }
 
 
 function removeExistingCallsign(name) {
-
     return String(name || "")
-        .replace(
-            /^\s*\[D-\d{1,2}\]\s*/i,
-            ""
-        )
+        .replace(/^\s*\[(?:D-|P-)?\d{1,3}\]\s*/i, "")
         .trim();
 }
 
@@ -9360,7 +9320,7 @@ app.get(
                     .status(403)
                     .json({
                         error:
-                            "Acest utilizator nu face parte din structura DIICOT."
+                            "Acest utilizator nu face parte din structura Poliției."
                     });
             }
 
@@ -9591,7 +9551,7 @@ app.get(
 
 // ======================================================
 // ADMIN - LISTĂ GRADE DISPONIBILE
-// COORDONATOR+ POATE ALEGE ORICARE DIN CELE 13 GRADE
+// CONDUCEREA POLIȚIEI POATE ALEGE GRADELE POLIȚIEI
 // ======================================================
 
 app.get(
@@ -10211,7 +10171,7 @@ app.patch(
 
 // ======================================================
 // ADMIN - SCHIMBARE CALLSIGN
-// Format final: [D-XX] Nume
+// Format final: [XXX] Nume
 // Exemple:
 // 6      -> D-06
 // 06     -> D-06
@@ -10287,7 +10247,7 @@ app.patch(
                 .status(400)
                 .json({
                     error:
-                        "Callsign invalid. Folosește un număr între 01 și 99."
+                        "Callsign invalid. Folosește un call-sign valid din grila Poliției."
                 });
         }
 
@@ -10347,7 +10307,7 @@ app.patch(
                     .status(400)
                     .json({
                         error:
-                            "Acest utilizator nu face parte din structura DIICOT."
+                            "Acest utilizator nu face parte din structura Poliției."
                     });
             }
 
@@ -12304,7 +12264,7 @@ app.post(
 );
 
 
-// COORDONATOR+ vede toate cererile.
+// Conducerea Poliției vede toate cererile.
 app.get(
     "/api/admin/callsign-requests",
     requireAdmin,
@@ -12335,7 +12295,7 @@ app.get(
 );
 
 
-// COORDONATOR+ aprobă și acordă callsign-ul.
+// Conducerea Poliției aprobă și acordă callsign-ul.
 // Se actualizează Discord nickname + profilul site-ului. DOCS rămâne complet separat.
 app.patch(
     "/api/admin/callsign-requests/:id/approve",
@@ -12348,7 +12308,7 @@ app.patch(
 
         if (!requestId || !callsign) {
             return res.status(400).json({
-                error: "Cererea sau callsign-ul este invalid. Folosește D-01 până la D-99."
+                error: "Cererea sau callsign-ul este invalid. Folosește un call-sign valid din grila Poliției."
             });
         }
 
@@ -12404,7 +12364,7 @@ app.patch(
 
             if (!rank) {
                 return res.status(400).json({
-                    error: "Membrul nu mai face parte din structura DIICOT."
+                    error: "Membrul nu mai face parte din structura Poliției."
                 });
             }
 
@@ -15494,7 +15454,7 @@ app.get(
                 "ok",
 
             service:
-                "DIICOT Command Center",
+                "Police Command Center",
 
             timestamp:
                 new Date()
